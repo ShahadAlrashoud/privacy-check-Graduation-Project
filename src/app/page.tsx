@@ -1,33 +1,64 @@
-import Image from "next/image";
-
-export default function Home() {
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
-      <div className="flex flex-col items-center gap-6 px-6 text-center">
-    {/* Your logo */}
-    <Image
-      src="/privacy-check-logo-transparent.png"
-      alt="Project Logo"
-      width={180}
-      height={180}
-      priority
-      className="object-contain"
-    />
-
-    <h1 className="text-4xl font-bold tracking-tight text-black dark:text-white">
-      🚧 Work in Progress
-    </h1>
-
-    <p className="max-w-md text-lg text-zinc-600 dark:text-zinc-400">
-      We're currently building something great. Check back soon!
-    </p>
-
-    <div className="mt-4 rounded-full bg-zinc-200 px-5 py-2 text-sm font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
-      Coming Soon
-    </div>
-
-      </div>
-    </main>
-  );
+"use client";  
+  
+import { useState } from "react";  
+import { useRouter } from "next/navigation";  
+  
+export default function HomePage() {  
+  const router = useRouter();  
+  const [url, setUrl] = useState("");  
+  const [error, setError] = useState("");  
+  const [loading, setLoading] = useState(false);  
+  
+  function isValidUrl(value: string) {  
+    try {  
+      const parsed = new URL(value);  
+      return parsed.protocol === "http:" || parsed.protocol === "https:";  
+    } catch {  
+      return false;  
+    }  
+  }  
+  
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {  
+    e.preventDefault();  
+    setError("");  
+  
+    if (!url.trim()) {  
+      setError("Please enter a website URL.");  
+      return;  
+    }  
+  
+    if (!isValidUrl(url)) {  
+      setError("Please enter a valid URL (must start with http:// or https://).");  
+      return;  
+    }  
+  
+    setLoading(true);  
+    router.push(`/analyze?url=${encodeURIComponent(url.trim())}`);  
+  }  
+  
+  return (  
+    <main className="container">  
+      <h1>Wafiq Biwa&apos;i</h1>  
+      <p>  
+        Paste a website URL to analyze its Terms of Service / Privacy Policy and get a simple risk summary.  
+      </p>  
+  
+      <form onSubmit={handleSubmit}>  
+        <div className="input-row">  
+          <input  
+            type="url"  
+            placeholder="https://example.com"  
+            value={url}  
+            onChange={(e) => setUrl(e.target.value)}  
+            disabled={loading}  
+          />  
+          <button type="submit" disabled={loading}>  
+            {loading ? "Loading..." : "Analyze"}  
+          </button>  
+        </div>  
+      </form>  
+  
+      {error && <p className="message error">{error}</p>}  
+    </main>  
+  );  
 }
-
