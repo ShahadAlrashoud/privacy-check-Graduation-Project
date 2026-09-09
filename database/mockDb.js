@@ -1,4 +1,6 @@
-import { sql } from "@vercel/postgres";
+import { neon } from "@neondatabase/serverless";
+
+const sql = neon(process.env.DATABASE_URL);
 
 export async function saveAnalysis(record) {
     await sql`
@@ -16,7 +18,7 @@ export async function saveAnalysis(record) {
 }
 
 export async function getAnalysisById(id) {
-    const { rows } = await sql`SELECT * FROM analyses WHERE id = ${id}`;
+    const rows = await sql`SELECT * FROM analyses WHERE id = ${id}`;
     if (rows.length === 0) return null;
 
     const row = rows[0];
