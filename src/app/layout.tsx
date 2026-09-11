@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
-  title: "Wafiq Biwa'i",
-  description: "Analyze Terms of Service and Privacy Policy pages with a simple risk summary."
+  title: "PrivacyCheck",
+  description: "Analyze Terms of Service and Privacy Policy pages with an analysis of the risks involved."
 };
 
 type RootLayoutProps = {

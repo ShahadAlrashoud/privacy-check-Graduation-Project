@@ -7,12 +7,29 @@ export async function POST(request) {
         const url = body?.url?.trim();
 
         if (!url) {
-            return NextResponse.json({ error: "URL is required." }, { status: 400 });
+            return NextResponse.json(
+                { error: "URL is required." },
+                { status: 400 }
+            );
         }
 
         const result = await runAnalysisForUrl(url);
-        return NextResponse.json({ id: result.id }, { status: 200 });
-    } catch {
-        return NextResponse.json({ error: "Invalid request." }, { status: 400 });
+
+        return NextResponse.json(
+            { id: result.id },
+            { status: 200 }
+        );
+
+    } catch (error) {
+        console.error("ANALYSIS API ERROR:", error);
+
+        return NextResponse.json(
+            {
+                error: error instanceof Error
+                    ? error.message
+                    : "An unknown server error occurred."
+            },
+            { status: 500 }
+        );
     }
 }

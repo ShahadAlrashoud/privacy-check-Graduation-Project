@@ -9,6 +9,8 @@ export default function AnalyzePage() {
     const url = searchParams.get("url");
     const [error, setError] = useState("");
 
+
+
     useEffect(() => {
         async function runAnalysis() {
             if (!url) {
@@ -23,7 +25,14 @@ export default function AnalyzePage() {
                     body: JSON.stringify({ url })
                 });
 
-                const data = await response.json();
+                const text = await response.text();
+
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch {
+                    throw new Error(`Server returned: ${text}`);
+                }
 
                 if (!response.ok) {
                     setError(data.error || "Analysis failed.");
@@ -31,8 +40,9 @@ export default function AnalyzePage() {
                 }
 
                 router.replace(`/results?id=${data.id}`);
-            } catch {
-                setError("Could not connect to API.");
+            } catch (error) {
+                console.error("Analysis error:", error);
+                setError(error.message || "Could not connect to API.");
             }
         }
 

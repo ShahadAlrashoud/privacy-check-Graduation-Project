@@ -26,24 +26,57 @@ async function fetchPolicyText(url) {
 }
 
 async function assessWithAI(policyText) {
-    const response = await fetch("https://routellm.abacus.ai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${process.env.ROUTELLM_API_KEY}`
-        },
-        body: JSON.stringify({
-            model: "route-llm",
-            messages: [
-                {
-                    role: "system",
-                    content: "You are a privacy policy risk analyzer. Read the given policy text and return ONLY valid JSON with this shape: {\"riskScore\": number 0-100, \"riskLevel\": \"Safe\"|\"Moderate Risk\"|\"High Risk\", \"summaryEn\": string, \"clauses\": [{\"category\": string, \"text\": string, \"riskWeight\": number}]}"
-                },
-                { role: "user", content: policyText.slice(0, 12000) }
-            ]
-        })
-    });
+    const response = await fetch(
+        "https://api.groq.com/openai/v1/chat/completions",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${process.env.GROQ_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: "openai/gpt-oss-120b",
+                messages: [
+                    {
+                        role: "system",
+                        content: `You are a privacy policy risk analyzer.
+
+Return ONLY valid JSON in this exact format:
+
+{
+  "riskScore": number,
+  "riskLevel": "Safe" | "Moderate Risk" | "High Risk",
+  "summaryEn": string,
+  "clauses": [
+    {
+      "category": string,
+      "text": string,
+      "riskWeight": number
+    }
+  ]
+}`
+                    },
+                    {
+                        role: "user",
+                        content: policyText.slice(0, 12000)
+                    }
+                ],
+                response_format: { type: "json_object" }
+            })
+        }
+    );
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`AI API error (${response.status}): ${errorText}`);
+    }
+
     const data = await response.json();
+
+    if (!data.choices?.[0]?.message?.content) {
+        throw new Error("AI returned an unexpected response.");
+    }
+
     return JSON.parse(data.choices[0].message.content);
 }
 
@@ -58,9 +91,11 @@ export async function runAnalysisForUrl(url) {
     const keywordScoring = scoreRisk(keywordClauses);
 
     let aiScoring;
+
     try {
         aiScoring = await assessWithAI(policyText);
-    } catch {
+    } catch (error) {
+        console.error("AI ANALYSIS ERROR:", error);
         aiScoring = null;
     }
 
