@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -75,7 +75,7 @@ function ScoreCircle({ score, tier }) {
     );
 }
 
-export default function ResultsPage() {
+function ResultsContent() {
     const searchParams = useSearchParams();
     const id = searchParams.get("id");
     const [result, setResult] = useState(null);
@@ -222,5 +222,13 @@ export default function ResultsPage() {
                 </Link>
             </div>
         </div>
+    );
+}
+
+export default function ResultsPage() {
+    return (
+        <Suspense fallback={<p style={{ textAlign: "center", padding: "48px" }}>Loading...</p>}>
+            <ResultsContent />
+        </Suspense>
     );
 }
