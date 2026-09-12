@@ -73,7 +73,7 @@ function AnalyzeContent() {
                 }}
             >
                 <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
-                    <Image src="/logo.png" alt="PrivacyCheck logo" width={70} height={70} priority />
+                    <Image src="/privacy-check-logo-transparent.png" alt="PrivacyCheck logo" width={70} height={70} priority />
                 </div>
 
                 {!error ? (
