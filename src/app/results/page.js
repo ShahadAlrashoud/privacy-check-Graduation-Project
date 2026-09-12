@@ -2,12 +2,13 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 
 const RISK_COLORS = {
-    safe: { ring: "#16a34a", bg: "#dcfce7", text: "#166534" },
-    moderate: { ring: "#ca8a04", bg: "#fef9c3", text: "#854d0e" },
-    high: { ring: "#dc2626", bg: "#fee2e2", text: "#991b1b" }
+    safe: { ring: "#86d9a4", bg: "#eafcf1", text: "#4a8f68" },
+    moderate: { ring: "#f2c96b", bg: "#fdf6e3", text: "#a17f2d" },
+    high: { ring: "#f19a9a", bg: "#fdecec", text: "#c06a6a" }
 };
 
 function getRiskTier(riskLevel) {
@@ -18,10 +19,16 @@ function getRiskTier(riskLevel) {
     return "moderate";
 }
 
+const CLAUSE_COLORS = {
+    high: "#c06a6a",
+    moderate: "#a17f2d",
+    safe: "#4a8f68"
+};
+
 function clauseColor(weight) {
-    if (weight >= 15) return RISK_COLORS.high.text;
-    if (weight >= 8) return RISK_COLORS.moderate.text;
-    return RISK_COLORS.safe.text;
+    if (weight >= 15) return CLAUSE_COLORS.high;
+    if (weight >= 8) return CLAUSE_COLORS.moderate;
+    return CLAUSE_COLORS.safe;
 }
 
 function ScoreCircle({ score, tier }) {
@@ -81,6 +88,8 @@ function ResultsContent() {
     const [result, setResult] = useState(null);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true);
+    const { data: session } = useSession();
+    const [saveStatus, setSaveStatus] = useState("");
 
     useEffect(() => {
         async function fetchResult() {
@@ -110,6 +119,22 @@ function ResultsContent() {
 
         fetchResult();
     }, [id]);
+
+    async function handleSave() {
+        if (!result?.id) return;
+        setSaveStatus("saving");
+        try {
+            const res = await fetch("/api/save", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ analysisId: result.id })
+            });
+            if (!res.ok) throw new Error();
+            setSaveStatus("saved");
+        } catch {
+            setSaveStatus("error");
+        }
+    }
 
     const tier = result ? getRiskTier(result.riskLevel) : "moderate";
     const colors = RISK_COLORS[tier];
@@ -169,6 +194,26 @@ function ResultsContent() {
                                 >
                                     {result.riskLevel}
                                 </span>
+
+                                {session?.user && (
+                                    <button
+                                        onClick={handleSave}
+                                        disabled={saveStatus === "saving" || saveStatus === "saved"}
+                                        style={{
+                                            marginTop: 12,
+                                            padding: "8px 20px",
+                                            borderRadius: 8,
+                                            border: "1px solid #274870",
+                                            background: saveStatus === "saved" ? "#274870" : "#fff",
+                                            color: saveStatus === "saved" ? "#fff" : "#274870",
+                                            fontWeight: 600,
+                                            fontSize: "0.85rem",
+                                            cursor: "pointer"
+                                        }}
+                                    >
+                                        {saveStatus === "saved" ? "Saved ✓" : saveStatus === "saving" ? "Saving..." : "Save Result"}
+                                    </button>
+                                )}
                             </div>
 
                             <div

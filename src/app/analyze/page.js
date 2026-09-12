@@ -34,7 +34,15 @@ function AnalyzeContent() {
                 }
 
                 if (!response.ok) {
-                    setError(data.error || "Analysis failed.");
+                    const message = data.error || "Analysis failed.";
+                    if (message.startsWith("BLOCKED:")) {
+                        setError(
+                            "This site blocks automated tools from reading it directly. Try copying the link to its Terms of Service or Privacy Policy page yourself and paste that instead."
+                        );
+                    } else {
+                        
+                        setError(message);
+                    }
                     return;
                 }
 
