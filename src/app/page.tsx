@@ -52,7 +52,7 @@ export default function HomePage() {
                     }}
                 >
                     <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
-                        <Image src="/logo.png" alt="PrivacyCheck logo" width={90} height={90} priority />
+                        <Image src="/privacy-check-logo-transparent.png" alt="PrivacyCheck logo" width={90} height={90} priority />
                     </div>
 
                     <h1 style={{ margin: "0 0 12px", fontSize: "1.8rem", color: "#1e3a5f", fontWeight: 700 }}>
