@@ -50,10 +50,10 @@ function AnalyzeContent() {
                 }
 
                 router.replace(`/results?id=${data.id}`);
-            } catch (error) {
-                console.error("Analysis error:", error);
-                setError(error.message || "Could not connect to API.");
-            }
+     } catch (error) {
+    console.error("Analysis error:", error);
+    setError(error instanceof Error ? error.message : "Could not connect to API.");
+}
         }
 
         runAnalysis();
