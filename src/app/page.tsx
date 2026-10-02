@@ -104,8 +104,8 @@ export default function HomePage() {
                         Analyze Website →
                     </button>
                 </form>
-                {error && <p style={{ color: "#dc2626", fontSize: "0.85rem", marginTop: 10 }}>{error}</p>}
-                <p style={{ marginTop: 14, fontSize: "0.8rem", color: isDark ? "#64748b" : "#94a3b8" }}>
+                                {error && <p style={{ color: "#dc2626", fontSize: "0.85rem", marginTop: 10 }}>{error}</p>}
+                <p style={{ marginTop: 14, fontSize: "0.8rem", color: isDark ? "#94a3b8" : "#64748b" }}>
                     Quick. Simple. Clear.
                 </p>
             </div>
