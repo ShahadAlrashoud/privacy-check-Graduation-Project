@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
+import { useTheme } from "./providers";
 
 export default function HomePage() {
     const [url, setUrl] = useState("");
     const [error, setError] = useState("");
     const router = useRouter();
+    const { theme, toggleTheme } = useTheme();
+    const isDark = theme === "dark";
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -20,162 +22,148 @@ export default function HomePage() {
         router.push(`/analyze?url=${encodeURIComponent(url.trim())}`);
     }
 
+    const features = [
+        { icon: "📄", title: "Terms of Service", text: "Understand what you're agreeing to." },
+        { icon: "🛡️", title: "Privacy Policy", text: "See how your data is collected and used." },
+        { icon: "⚠️", title: "Potential Risks", text: "Spot clauses that may matter to you." },
+        { icon: "✨", title: "Plain English", text: "Complex legal language, made simple." }
+    ];
+
     return (
         <div
             style={{
                 minHeight: "100vh",
-                background: "linear-gradient(180deg, #eef2f8 0%, #dbe4f0 100%)",
-                display: "flex",
-                flexDirection: "column",
-                fontFamily: "Segoe UI, Arial, sans-serif"
+                background: isDark
+                    ? "linear-gradient(180deg, #0a0e1a 0%, #111827 100%)"
+                    : "#ffffff",
+                fontFamily: "Segoe UI, Arial, sans-serif",
+                color: isDark ? "#f1f1f1" : "#1e293b"
             }}
         >
-            <div
+            {/* Nav */}
+            <nav
                 style={{
-                    flex: 1,
                     display: "flex",
-                    flexDirection: "column",
                     alignItems: "center",
-                    justifyContent: "center",
-                    padding: "24px"
+                    justifyContent: "space-between",
+                    padding: "20px 40px",
+                    maxWidth: 1100,
+                    margin: "0 auto"
                 }}
             >
-                <div
-                    style={{
-                        maxWidth: 520,
-                        width: "100%",
-                        background: "#ffffff",
-                        borderRadius: 16,
-                        boxShadow: "0 8px 30px rgba(30, 58, 95, 0.12)",
-                        padding: "40px 32px",
-                        textAlign: "center"
-                    }}
-                >
-                    <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
-                        <Image src="/privacy-check-logo-transparent.png" alt="PrivacyCheck logo" width={90} height={90} priority />
-                    </div>
-
-                    <h1 style={{ margin: "0 0 12px", fontSize: "1.8rem", color: "#1e3a5f", fontWeight: 700 }}>
-                        PrivacyCheck
-                    </h1>
-
-                    <p style={{ margin: "0 0 28px", color: "#64748b", fontSize: "0.95rem", lineHeight: 1.6 }}>
-                        Paste a website URL to analyze its Terms of Service / Privacy Policy
-                        and get a simple risk summary.
-                    </p>
-
-                    <form onSubmit={handleSubmit}>
-                        <input
-                            type="text"
-                            value={url}
-                            onChange={(e) => setUrl(e.target.value)}
-                            placeholder="https://example.com"
-                            style={{
-                                width: "100%",
-                                padding: "12px 16px",
-                                borderRadius: 10,
-                                border: "1px solid #dbe4f0",
-                                fontSize: "0.95rem",
-                                marginBottom: 16,
-                                boxSizing: "border-box",
-                                outline: "none",
-                                color: "#1e3a5f"
-                            }}
-                        />
-
-                        {error && (
-                            <p style={{ color: "#dc2626", fontSize: "0.85rem", marginBottom: 12 }}>{error}</p>
-                        )}
-
-                        <button
-                            type="submit"
-                            style={{
-                                width: "100%",
-                                padding: "12px 16px",
-                                borderRadius: 10,
-                                border: "none",
-                                background: "linear-gradient(135deg, #274870 0%, #5b7ba8 100%)",
-                                color: "#fff",
-                                fontWeight: 600,
-                                fontSize: "0.95rem",
-                                cursor: "pointer"
-                            }}
-                        >
-                            Analyze
-                        </button>
-                    </form>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 700, fontSize: "1.1rem" }}>
+                    🛡️ Privacy Check
                 </div>
+                <div style={{ display: "flex", gap: 24, fontSize: "0.9rem" }}>
+                    <Link href="/" style={{ color: "inherit", textDecoration: "none", fontWeight: 600 }}>Home</Link>
+                    <Link href="/about" style={{ color: isDark ? "#94a3b8" : "#64748b", textDecoration: "none" }}>About</Link>
+                    <Link href="/contact" style={{ color: isDark ? "#94a3b8" : "#64748b", textDecoration: "none" }}>FAQ</Link>
+                </div>
+                <button
+                    onClick={toggleTheme}
+                    style={{ border: "none", background: "transparent", fontSize: "1.3rem", cursor: "pointer" }}
+                    aria-label="Toggle theme"
+                >
+                    {isDark ? "☀️" : "🌙"}
+                </button>
+            </nav>
 
-                {/* Feature highlights */}
-                <div
+            {/* Hero */}
+            <div style={{ maxWidth: 700, margin: "0 auto", textAlign: "center", padding: "60px 24px 40px" }}>
+                <h1 style={{ fontSize: "2.6rem", fontWeight: 800, margin: "0 0 20px", lineHeight: 1.2 }}>
+                    Before you click{" "}
+                    <span style={{ color: "#5b7ba8" }}>&ldquo;I Agree&rdquo;</span>
+                </h1>
+                <p style={{ fontSize: "1.05rem", color: isDark ? "#94a3b8" : "#64748b", margin: "0 0 32px", lineHeight: 1.6 }}>
+                    We analyze Terms of Service and Privacy Policies so you can understand
+                    what you&apos;re really agreeing to.
+                </p>
+
+                <form
+                    onSubmit={handleSubmit}
                     style={{
-                        maxWidth: 520,
-                        width: "100%",
                         display: "flex",
-                        gap: 16,
-                        marginTop: 32,
-                        flexWrap: "wrap",
-                        justifyContent: "center"
+                        gap: 10,
+                        background: isDark ? "#111827" : "#f4f7fb",
+                        border: isDark ? "1px solid #334155" : "1px solid #e2e8f0",
+                        borderRadius: 14,
+                        padding: 8,
+                        maxWidth: 520,
+                        margin: "0 auto"
                     }}
                 >
-                    {[
-                        { title: "Fast Analysis", text: "Get results in seconds." },
-                        { title: "Risk Scoring", text: "0–100 score with clear risk levels." },
-                        { title: "Clause Detection", text: "Highlights risky legal language." }
-                    ].map((item) => (
-                        <div
-                            key={item.title}
-                            style={{
-                                flex: "1 1 140px",
-                                background: "#ffffff",
-                                borderRadius: 12,
-                                padding: "16px",
-                                boxShadow: "0 4px 14px rgba(30, 58, 95, 0.08)",
-                                textAlign: "center"
-                            }}
-                        >
-                            <h3 style={{ margin: "0 0 6px", fontSize: "0.9rem", color: "#1e3a5f" }}>
-                                {item.title}
-                            </h3>
-                            <p style={{ margin: 0, fontSize: "0.8rem", color: "#64748b" }}>{item.text}</p>
-                        </div>
-                    ))}
-                </div>
+                    <input
+                        type="text"
+                        value={url}
+                        onChange={(e) => setUrl(e.target.value)}
+                        placeholder="Enter website URL (e.g. example.com)"
+                        style={{
+                            flex: 1,
+                            border: "none",
+                            background: "transparent",
+                            outline: "none",
+                            padding: "10px 12px",
+                            fontSize: "0.95rem",
+                            color: isDark ? "#f1f1f1" : "#1e293b"
+                        }}
+                    />
+                    <button
+                        type="submit"
+                        style={{
+                            border: "none",
+                            borderRadius: 10,
+                            padding: "10px 20px",
+                            background: "linear-gradient(135deg, #274870 0%, #5b7ba8 100%)",
+                            color: "#fff",
+                            fontWeight: 600,
+                            fontSize: "0.9rem",
+                            cursor: "pointer",
+                            whiteSpace: "nowrap"
+                        }}
+                    >
+                        Analyze Website →
+                    </button>
+                </form>
+                {error && <p style={{ color: "#dc2626", fontSize: "0.85rem", marginTop: 10 }}>{error}</p>}
+                <p style={{ marginTop: 14, fontSize: "0.8rem", color: isDark ? "#64748b" : "#94a3b8" }}>
+                    Quick. Simple. Clear.
+                </p>
             </div>
 
-            {/* Footer */}
-            <footer
+            {/* Features */}
+            <div
                 style={{
-                    background: "#1e3a5f",
-                    color: "#cbd5e1",
-                    padding: "24px 16px",
-                    textAlign: "center",
-                    fontSize: "0.85rem"
+                    maxWidth: 900,
+                    margin: "0 auto",
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+                    gap: 24,
+                    padding: "20px 24px 80px",
+                    textAlign: "center"
                 }}
             >
-                <div
-                    style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        gap: 24,
-                        flexWrap: "wrap",
-                        marginBottom: 12
-                    }}
-                >
-                    <Link href="/about" style={{ color: "#cbd5e1", textDecoration: "none" }}>
-                        About
-                    </Link>
-                    <Link href="/privacy" style={{ color: "#cbd5e1", textDecoration: "none" }}>
-                        Privacy Policy
-                    </Link>
-                    <Link href="/contact" style={{ color: "#cbd5e1", textDecoration: "none" }}>
-                        Contact
-                    </Link>
-                </div>
-                <p style={{ margin: 0, opacity: 0.7 }}>
-                    © {new Date().getFullYear()} PrivacyCheck. All rights reserved.
-                </p>
-            </footer>
+                {features.map((f) => (
+                    <div key={f.title}>
+                        <div
+                            style={{
+                                width: 48,
+                                height: 48,
+                                margin: "0 auto 12px",
+                                borderRadius: 12,
+                                background: isDark ? "#1e293b" : "#eef2f8",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: "1.4rem"
+                            }}
+                        >
+                            {f.icon}
+                        </div>
+                        <h3 style={{ margin: "0 0 6px", fontSize: "0.95rem" }}>{f.title}</h3>
+                        <p style={{ margin: 0, fontSize: "0.8rem", color: isDark ? "#94a3b8" : "#64748b" }}>{f.text}</p>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }

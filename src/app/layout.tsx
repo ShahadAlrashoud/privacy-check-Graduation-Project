@@ -2,21 +2,21 @@ import "./globals.css";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Providers from "./providers";
+import Header from "./components/Header";
 
 export const metadata: Metadata = {
   title: "PrivacyCheck",
   description: "Analyze Terms of Service and Privacy Policy pages with an analysis of the risks involved."
 };
 
-type RootLayoutProps = {
-  children: ReactNode;
-};
-
-export default function RootLayout({ children }: RootLayoutProps) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          <Header />
+          {children}
+        </Providers>
       </body>
     </html>
   );
