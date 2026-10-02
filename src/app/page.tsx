@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { useTheme } from "./providers";
+import BYANLogo from "../components/BYANLogo";
 
 export default function HomePage() {
     const [url, setUrl] = useState("");
     const [error, setError] = useState("");
     const router = useRouter();
-    const { theme, toggleTheme } = useTheme();
+    const { theme } = useTheme();
     const isDark = theme === "dark";
 
     function handleSubmit(e: React.FormEvent) {
@@ -40,16 +40,24 @@ export default function HomePage() {
                 color: isDark ? "#f1f1f1" : "#1e293b"
             }}
         >
-            {/* Nav */}
-
             {/* Hero */}
             <div style={{ maxWidth: 700, margin: "0 auto", textAlign: "center", padding: "60px 24px 40px" }}>
-          <h1 style={{ fontSize: "2.6rem", fontWeight: 800, margin: "0 0 20px", lineHeight: 1.2 }}>
-    Before You <span style={{ color: "#5b7ba8" }}>Agree</span>
-</h1>
-<p style={{ fontSize: "1.05rem", color: isDark ? "#94a3b8" : "#64748b", margin: "0 0 32px", lineHeight: 1.6 }}>
-    Know your rights. Understand your terms.
-</p>
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: 24 }}>
+                    <BYANLogo isDark={isDark} size="lg" />
+                </div>
+
+                <p style={{ margin: 0, fontSize: "0.85rem", color: isDark ? "#94a3b8" : "#64748b" }}>
+                    <span style={{ color: "#5b7ba8", fontWeight: 700 }}>B</span>efore{" "}
+                    <span style={{ color: "#5b7ba8", fontWeight: 700 }}>Y</span>ou{" "}
+                    <span style={{ color: "#5b7ba8", fontWeight: 700 }}>A</span>gree
+                </p>
+
+                <h1 style={{ fontSize: "2.6rem", fontWeight: 800, margin: "0 0 20px", lineHeight: 1.2 }}>
+                    Before You <span style={{ color: "#5b7ba8" }}>Agree</span>
+                </h1>
+                <p style={{ fontSize: "1.05rem", color: isDark ? "#94a3b8" : "#64748b", margin: "0 0 32px", lineHeight: 1.6 }}>
+                    Know your rights. Understand your terms.
+                </p>
 
                 <form
                     onSubmit={handleSubmit}

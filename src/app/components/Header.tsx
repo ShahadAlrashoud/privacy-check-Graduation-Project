@@ -1,6 +1,7 @@
 "use client";
 
 import { useTheme } from "../providers";
+import BYANLogo from "./BYANLogo";
 
 export default function Header() {
     const { isDark, toggleTheme } = (() => {
@@ -9,7 +10,16 @@ export default function Header() {
     })();
 
     return (
-        <div style={{ display: "flex", justifyContent: "flex-end", padding: "16px 24px" }}>
+        <div
+            style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "16px 24px"
+            }}
+        >
+            <BYANLogo isDark={isDark} size="md" />
+
             <button
                 onClick={toggleTheme}
                 style={{
