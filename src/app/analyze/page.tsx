@@ -52,8 +52,7 @@ function AnalyzeContent() {
                 router.replace(`/results?id=${data.id}`);
      } catch (error) {
     console.error("Analysis error:", error);
-    setError(error instanceof Error ? error.message : "Could not connect to API.");
-}
+setError(error instanceof Error ? error.message : "Could not connect to API.");}
         }
 
         runAnalysis();
