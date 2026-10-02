@@ -10,6 +10,7 @@ function AnalyzeContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const url = searchParams.get("url");
+    const lang = searchParams.get("lang") === "ar" ? "ar" : "en";
     const [error, setError] = useState("");
     const { theme } = useTheme();
     const isDark = theme === "dark";
@@ -25,7 +26,7 @@ function AnalyzeContent() {
                 const response = await fetch("/api/analyze", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ url })
+                    body: JSON.stringify({ url, lang })
                 });
 
                 const text = await response.text();
@@ -56,7 +57,7 @@ setError(error instanceof Error ? error.message : "Could not connect to API.");}
         }
 
         runAnalysis();
-    }, [url, router]);
+    }, [url, lang, router]);
 
     return (
         <div

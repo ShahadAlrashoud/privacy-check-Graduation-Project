@@ -5,6 +5,7 @@ export async function POST(request) {
     try {
         const body = await request.json();
         const url = body?.url?.trim();
+        const preferredLang = body?.lang === "ar" ? "ar" : "en";
 
         if (!url) {
             return NextResponse.json(
@@ -13,7 +14,7 @@ export async function POST(request) {
             );
         }
 
-        const result = await runAnalysisForUrl(url);
+        const result = await runAnalysisForUrl(url, preferredLang);
 
         return NextResponse.json(
             { id: result.id },

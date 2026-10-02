@@ -4,7 +4,7 @@ const sql = neon(process.env.DATABASE_URL);
 
 export async function saveAnalysis(record) {
   await sql`
-    INSERT INTO analyses (id, url, risk_score, risk_level, summary_en, clauses, created_at)
+    INSERT INTO analyses (id, url, risk_score, risk_level, summary_en, clauses, created_at, lang)
     VALUES (
       ${record.id},
       ${record.url},
@@ -12,7 +12,8 @@ export async function saveAnalysis(record) {
       ${record.riskLevel},
       ${record.summaryEn},
       ${JSON.stringify(record.clauses)},
-      ${record.createdAt}
+      ${record.createdAt},
+      ${record.lang || "en"}
     )
   `;
 }
@@ -29,7 +30,8 @@ export async function getAnalysisById(id) {
     riskLevel: row.risk_level,
     summaryEn: row.summary_en,
     clauses: row.clauses,
-    createdAt: row.created_at
+    createdAt: row.created_at,
+    lang: row.lang || "en"
   };
 }
 

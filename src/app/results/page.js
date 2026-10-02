@@ -91,6 +91,12 @@ function ResultsContent() {
     const { data: session } = useSession();
     const [saveStatus, setSaveStatus] = useState("");
 
+    // Translation state
+    const [displayLang, setDisplayLang] = useState(null); // set once result loads
+    const [translatedData, setTranslatedData] = useState(null); // cached translation
+    const [translating, setTranslating] = useState(false);
+    const [translateError, setTranslateError] = useState("");
+
     useEffect(() => {
         async function fetchResult() {
             if (!id) {
@@ -110,6 +116,7 @@ function ResultsContent() {
                 }
 
                 setResult(data);
+                setDisplayLang(data.lang === "ar" ? "ar" : "en");
             } catch {
                 setError("Could not load result.");
             } finally {
@@ -136,16 +143,70 @@ function ResultsContent() {
         }
     }
 
+    async function handleToggleLanguage() {
+        if (!result) return;
+        const targetLang = displayLang === "ar" ? "en" : "ar";
+
+        // If we're switching back to the original language, no API call needed
+        const originalLang = result.lang === "ar" ? "ar" : "en";
+        if (targetLang === originalLang) {
+            setDisplayLang(targetLang);
+            return;
+        }
+
+        // If we already translated to this target language before, reuse it
+        if (translatedData && translatedData.lang === targetLang) {
+            setDisplayLang(targetLang);
+            return;
+        }
+
+        setTranslating(true);
+        setTranslateError("");
+        try {
+            const res = await fetch("/api/translate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    summaryEn: result.summaryEn,
+                    clauses: result.clauses,
+                    targetLang
+                })
+            });
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || "Translation failed.");
+            }
+
+            setTranslatedData({ ...data, lang: targetLang });
+            setDisplayLang(targetLang);
+        } catch (err) {
+            setTranslateError(err instanceof Error ? err.message : "Translation failed.");
+        } finally {
+            setTranslating(false);
+        }
+    }
+
     const tier = result ? getRiskTier(result.riskLevel) : "moderate";
     const colors = RISK_COLORS[tier];
 
+    const originalLang = result?.lang === "ar" ? "ar" : "en";
+    const isShowingTranslated = displayLang && displayLang !== originalLang;
+    const activeSummary = isShowingTranslated && translatedData ? translatedData.summaryEn : result?.summaryEn;
+    const activeClauses = isShowingTranslated && translatedData ? translatedData.clauses : result?.clauses;
+
+    const isArabic = displayLang === "ar";
+    const dir = isArabic ? "rtl" : "ltr";
+    const textAlign = isArabic ? "right" : "left";
+
     return (
         <div
+            dir={dir}
             style={{
                 minHeight: "100vh",
                 background: "linear-gradient(180deg, #eef2f8 0%, #dbe4f0 100%)",
                 padding: "48px 16px",
-                fontFamily: "Segoe UI, Arial, sans-serif"
+                fontFamily: isArabic ? "'Segoe UI', Tahoma, Arial, sans-serif" : "Segoe UI, Arial, sans-serif"
             }}
         >
             <div
@@ -162,20 +223,61 @@ function ResultsContent() {
                     style={{
                         background: "linear-gradient(135deg, #274870 0%, #5b7ba8 100%)",
                         padding: "28px 32px",
-                        color: "#fff"
+                        color: "#fff",
+                        textAlign,
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        gap: 16,
+                        flexWrap: "wrap"
                     }}
                 >
-                    <h1 style={{ margin: 0, fontSize: "1.5rem" }}>Analysis Results</h1>
+                    <div>
+                        <h1 style={{ margin: 0, fontSize: "1.5rem" }}>
+                            {isArabic ? "نتائج التحليل" : "Analysis Results"}
+                        </h1>
+                        {result && (
+                            <p style={{ margin: "8px 0 0", opacity: 0.85, fontSize: "0.9rem", wordBreak: "break-all" }}>
+                                {result.url}
+                            </p>
+                        )}
+                    </div>
+
                     {result && (
-                        <p style={{ margin: "8px 0 0", opacity: 0.85, fontSize: "0.9rem", wordBreak: "break-all" }}>
-                            {result.url}
-                        </p>
+                        <button
+                            onClick={handleToggleLanguage}
+                            disabled={translating}
+                            style={{
+                                flexShrink: 0,
+                                padding: "8px 16px",
+                                borderRadius: 8,
+                                border: "1px solid rgba(255,255,255,0.6)",
+                                background: "rgba(255,255,255,0.12)",
+                                color: "#fff",
+                                fontWeight: 600,
+                                fontSize: "0.85rem",
+                                cursor: translating ? "wait" : "pointer"
+                            }}
+                        >
+                            {translating
+                                ? (isArabic ? "جارٍ الترجمة..." : "Translating...")
+                                : displayLang === "ar"
+                                    ? "View in English"
+                                    : "عرض بالعربية"}
+                        </button>
                     )}
                 </div>
 
-                <div style={{ padding: "32px" }}>
-                    {loading && <p style={{ textAlign: "center", color: "#64748b" }}>Loading result...</p>}
+                <div style={{ padding: "32px", textAlign }}>
+                    {loading && (
+                        <p style={{ textAlign: "center", color: "#64748b" }}>
+                            {isArabic ? "جارٍ تحميل النتيجة..." : "Loading result..."}
+                        </p>
+                    )}
                     {error && <p style={{ textAlign: "center", color: "#dc2626" }}>{error}</p>}
+                    {translateError && (
+                        <p style={{ textAlign: "center", color: "#dc2626", marginBottom: 16 }}>{translateError}</p>
+                    )}
 
                     {!loading && result && (
                         <>
@@ -211,7 +313,11 @@ function ResultsContent() {
                                             cursor: "pointer"
                                         }}
                                     >
-                                        {saveStatus === "saved" ? "Saved ✓" : saveStatus === "saving" ? "Saving..." : "Save Result"}
+                                        {saveStatus === "saved"
+                                            ? isArabic ? "تم الحفظ ✓" : "Saved ✓"
+                                            : saveStatus === "saving"
+                                                ? isArabic ? "جارٍ الحفظ..." : "Saving..."
+                                                : isArabic ? "حفظ النتيجة" : "Save Result"}
                                     </button>
                                 )}
                             </div>
@@ -220,25 +326,33 @@ function ResultsContent() {
                                 style={{
                                     background: "#f4f7fb",
                                     border: "1px solid #dbe4f0",
-                                    borderLeft: `4px solid ${colors.ring}`,
+                                    [isArabic ? "borderRight" : "borderLeft"]: `4px solid ${colors.ring}`,
                                     borderRadius: 10,
                                     padding: "18px 20px",
                                     marginBottom: 32
                                 }}
                             >
-                                <h3 style={{ margin: "0 0 8px", color: "#1e3a5f", fontSize: "1rem" }}>Summary</h3>
+                                <h3 style={{ margin: "0 0 8px", color: "#1e3a5f", fontSize: "1rem" }}>
+                                    {isArabic ? "الملخص" : "Summary"}
+                                </h3>
                                 <p style={{ margin: 0, color: "#334155", lineHeight: 1.6, fontSize: "0.95rem" }}>
-                                    {result.summaryEn}
+                                    {activeSummary}
                                 </p>
                             </div>
 
                             <div>
-                                <h3 style={{ margin: "0 0 12px", color: "#1e3a5f", fontSize: "1rem" }}>Detected Clauses</h3>
-                                {result.clauses.length === 0 ? (
-                                    <p style={{ color: "#64748b" }}>No risky clauses detected in this basic scaffold.</p>
+                                <h3 style={{ margin: "0 0 12px", color: "#1e3a5f", fontSize: "1rem" }}>
+                                    {isArabic ? "البنود المكتشفة" : "Detected Clauses"}
+                                </h3>
+                                {activeClauses.length === 0 ? (
+                                    <p style={{ color: "#64748b" }}>
+                                        {isArabic
+                                            ? "لم يتم اكتشاف بنود خطرة في هذا التحليل الأساسي."
+                                            : "No risky clauses detected in this basic scaffold."}
+                                    </p>
                                 ) : (
-                                    <ul style={{ paddingLeft: 20, margin: 0 }}>
-                                        {result.clauses.map((c, idx) => (
+                                    <ul style={{ [isArabic ? "paddingRight" : "paddingLeft"]: 20, margin: 0 }}>
+                                        {activeClauses.map((c, idx) => (
                                             <li
                                                 key={idx}
                                                 style={{
@@ -249,7 +363,7 @@ function ResultsContent() {
                                             >
                                                 <strong>{c.category}:</strong> {c.text}{" "}
                                                 <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>
-                                                    (weight: {c.riskWeight})
+                                                    ({isArabic ? "الوزن" : "weight"}: {c.riskWeight})
                                                 </span>
                                             </li>
                                         ))}
@@ -263,7 +377,7 @@ function ResultsContent() {
 
             <div style={{ textAlign: "center", marginTop: 24 }}>
                 <Link href="/" style={{ color: "#274870", textDecoration: "none", fontWeight: 500 }}>
-                    ← Back to Homepage
+                    {isArabic ? "→ العودة إلى الصفحة الرئيسية" : "← Back to Homepage"}
                 </Link>
             </div>
         </div>

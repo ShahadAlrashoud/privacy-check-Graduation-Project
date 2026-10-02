@@ -33,17 +33,20 @@ const FALLBACK_PATHS = [
     "/legal"
 ];
 
-const BROWSER_HEADERS = {
-    "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.9"
-};
+function buildHeaders(url) {
+    const isArabicHint = /[?&]hl=ar\b/i.test(url) || /\/ar\//i.test(url);
+    return {
+        "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": isArabicHint ? "ar,en;q=0.5" : "en-US,en;q=0.9"
+    };
+}
 
 async function fetchHtml(url) {
     let response;
     try {
-        response = await fetch(url, { headers: BROWSER_HEADERS });
+        response = await fetch(url, { headers: buildHeaders(url) });
     } catch {
         throw new Error("BLOCKED: This site could not be reached automatically.");
     }
@@ -114,7 +117,7 @@ async function tryFallbackPaths(baseUrl) {
         try {
             const response = await fetch(candidateUrl, {
                 method: "GET",
-                headers: BROWSER_HEADERS
+                headers: buildHeaders(candidateUrl)
             });
             if (response.ok) {
                 const html = await response.text();
@@ -152,7 +155,18 @@ async function fetchPolicyText(url) {
     return { text: htmlToText(homepageHtml), resolvedUrl: url };
 }
 
-async function assessWithAI(policyText) {
+function detectLanguage(text) {
+    const arabicMatches = text.match(/[\u0600-\u06FF]/g) || [];
+    const ratio = arabicMatches.length / Math.max(text.length, 1);
+    return ratio > 0.08 ? "ar" : "en";
+}
+
+async function assessWithAI(policyText, lang) {
+    const languageInstruction =
+        lang === "ar"
+            ? `Write the "summaryEn" field and all "category"/"text" fields in Arabic (Modern Standard Arabic), even though the field is named "summaryEn".`
+            : `Write all fields in English.`;
+
     const response = await fetch(
         "https://api.groq.com/openai/v1/chat/completions",
         {
@@ -167,6 +181,8 @@ async function assessWithAI(policyText) {
                     {
                         role: "system",
                         content: `You are a privacy policy risk analyzer.
+
+${languageInstruction}
 
 Return ONLY valid JSON in this exact format:
 
@@ -207,12 +223,15 @@ Return ONLY valid JSON in this exact format:
     return JSON.parse(data.choices[0].message.content);
 }
 
-export async function runAnalysisForUrl(url) {
+export async function runAnalysisForUrl(url, preferredLang = "en") {
     if (!isValidHttpUrl(url)) {
         throw new Error("Invalid URL");
     }
 
     const { text: policyText, resolvedUrl } = await fetchPolicyText(url);
+
+    const detectedLang = detectLanguage(policyText);
+    const lang = detectedLang; // result always follows the actual document's language
 
     const keywordClauses = detectRiskClauses(policyText);
     const keywordScoring = scoreRisk(keywordClauses);
@@ -220,7 +239,7 @@ export async function runAnalysisForUrl(url) {
     let aiScoring;
 
     try {
-        aiScoring = await assessWithAI(policyText);
+        aiScoring = await assessWithAI(policyText, lang);
     } catch (error) {
         console.error("AI ANALYSIS ERROR:", error);
         aiScoring = null;
@@ -230,6 +249,8 @@ export async function runAnalysisForUrl(url) {
         id: crypto.randomUUID(),
         url,
         resolvedUrl,
+        lang,
+        preferredLang,
         riskScore: Math.round(aiScoring?.riskScore ?? keywordScoring.riskScore),
         riskLevel: aiScoring?.riskLevel ?? keywordScoring.riskLevel,
         summaryEn: aiScoring?.summaryEn ?? keywordScoring.summaryEn,
