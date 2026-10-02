@@ -41,32 +41,6 @@ export default function HomePage() {
             }}
         >
             {/* Nav */}
-            <nav
-                style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "20px 40px",
-                    maxWidth: 1100,
-                    margin: "0 auto"
-                }}
-            >
-                <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 700, fontSize: "1.1rem" }}>
-                    🛡️ Privacy Check
-                </div>
-                <div style={{ display: "flex", gap: 24, fontSize: "0.9rem" }}>
-                    <Link href="/" style={{ color: "inherit", textDecoration: "none", fontWeight: 600 }}>Home</Link>
-                    <Link href="/about" style={{ color: isDark ? "#94a3b8" : "#64748b", textDecoration: "none" }}>About</Link>
-                    <Link href="/contact" style={{ color: isDark ? "#94a3b8" : "#64748b", textDecoration: "none" }}>FAQ</Link>
-                </div>
-                <button
-                    onClick={toggleTheme}
-                    style={{ border: "none", background: "transparent", fontSize: "1.3rem", cursor: "pointer" }}
-                    aria-label="Toggle theme"
-                >
-                    {isDark ? "☀️" : "🌙"}
-                </button>
-            </nav>
 
             {/* Hero */}
             <div style={{ maxWidth: 700, margin: "0 auto", textAlign: "center", padding: "60px 24px 40px" }}>
