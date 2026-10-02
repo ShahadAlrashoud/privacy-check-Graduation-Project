@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "./providers";
-import BYANLogo from "../components/BYANLogo";
+import BYANLogo from "./components/BYANLogo";
 
 export default function HomePage() {
     const [url, setUrl] = useState("");
