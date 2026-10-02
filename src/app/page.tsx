@@ -44,14 +44,12 @@ export default function HomePage() {
 
             {/* Hero */}
             <div style={{ maxWidth: 700, margin: "0 auto", textAlign: "center", padding: "60px 24px 40px" }}>
-                <h1 style={{ fontSize: "2.6rem", fontWeight: 800, margin: "0 0 20px", lineHeight: 1.2 }}>
-                    Before you click{" "}
-                    <span style={{ color: "#5b7ba8" }}>&ldquo;I Agree&rdquo;</span>
-                </h1>
-                <p style={{ fontSize: "1.05rem", color: isDark ? "#94a3b8" : "#64748b", margin: "0 0 32px", lineHeight: 1.6 }}>
-                    We analyze Terms of Service and Privacy Policies so you can understand
-                    what you&apos;re really agreeing to.
-                </p>
+          <h1 style={{ fontSize: "2.6rem", fontWeight: 800, margin: "0 0 20px", lineHeight: 1.2 }}>
+    Before You <span style={{ color: "#5b7ba8" }}>Agree</span>
+</h1>
+<p style={{ fontSize: "1.05rem", color: isDark ? "#94a3b8" : "#64748b", margin: "0 0 32px", lineHeight: 1.6 }}>
+    Know your rights. Understand your terms.
+</p>
 
                 <form
                     onSubmit={handleSubmit}

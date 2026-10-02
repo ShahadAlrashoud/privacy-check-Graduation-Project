@@ -5,7 +5,7 @@ import Providers from "./providers";
 import Header from "./components/Header";
 
 export const metadata: Metadata = {
-  title: "PrivacyCheck",
+  title: "BYAN",
   description: "Analyze Terms of Service and Privacy Policy pages with an analysis of the risks involved."
 };
 
