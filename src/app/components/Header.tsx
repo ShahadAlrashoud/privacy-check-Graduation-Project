@@ -1,14 +1,21 @@
 "use client";
 
+import Link from "next/link";
 import { useTheme } from "../providers";
 import BYANLogo from "./BYANLogo";
-
 
 export default function Header() {
     const { isDark, toggleTheme } = (() => {
         const t = useTheme();
         return { isDark: t.theme === "dark", toggleTheme: t.toggleTheme };
     })();
+
+    const linkStyle = {
+        color: isDark ? "#dbe4f0" : "#274870",
+        textDecoration: "none",
+        fontSize: "0.9rem",
+        fontWeight: 500
+    };
 
     return (
         <div
@@ -22,19 +29,26 @@ export default function Header() {
         >
             <BYANLogo isDark={isDark} size="sm" rotate={false} />
 
-            <button
-                onClick={toggleTheme}
-                style={{
-                    border: "none",
-                    background: "transparent",
-                    fontSize: "1.3rem",
-                    cursor: "pointer",
-                    lineHeight: 1
-                }}
-                aria-label="Toggle theme"
-            >
-                {isDark ? "☀️" : "🌙"}
-            </button>
+            <nav style={{ display: "flex", alignItems: "center", gap: 20 }}>
+                <Link href="/" style={linkStyle}>Home</Link>
+                <Link href="/analyze" style={linkStyle}>Analyze</Link>
+                <Link href="/about" style={linkStyle}>About</Link>
+                <Link href="/login" style={linkStyle}>Login</Link>
+
+                <button
+                    onClick={toggleTheme}
+                    style={{
+                        border: "none",
+                        background: "transparent",
+                        fontSize: "1.3rem",
+                        cursor: "pointer",
+                        lineHeight: 1
+                    }}
+                    aria-label="Toggle theme"
+                >
+                    {isDark ? "☀️" : "🌙"}
+                </button>
+            </nav>
         </div>
     );
 }
