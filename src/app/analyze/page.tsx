@@ -6,19 +6,43 @@ import Image from "next/image";
 import { useTheme } from "../providers";
 import Link from "next/link";
 
+const content = {
+    en: {
+        back: "← Back",
+        analyzing: "Analyzing...",
+        wait: "Please wait while we process the policy.",
+        failed: "Analysis Failed",
+        missingUrl: "Missing URL. Go back and paste a valid URL.",
+        blocked:
+            "This site blocks automated tools from reading it directly. Try copying the link to its Terms of Service or Privacy Policy page yourself and paste that instead.",
+        connectError: "Could not connect to API."
+    },
+    ar: {
+        back: "→ رجوع",
+        analyzing: "جارٍ التحليل...",
+        wait: "الرجاء الانتظار بينما نعالج السياسة.",
+        failed: "فشل التحليل",
+        missingUrl: "الرابط مفقود. ارجع والصق رابطًا صالحًا.",
+        blocked:
+            "يمنع هذا الموقع الأدوات الآلية من قراءته مباشرة. حاول نسخ رابط صفحة شروط الخدمة أو سياسة الخصوصية بنفسك ولصقه هنا بدلاً من ذلك.",
+        connectError: "تعذر الاتصال بالخادم."
+    }
+};
+
 function AnalyzeContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const url = searchParams.get("url");
-    const lang = searchParams.get("lang") === "ar" ? "ar" : "en";
     const [error, setError] = useState("");
-    const { theme } = useTheme();
+    const { theme, lang } = useTheme();
     const isDark = theme === "dark";
+    const isAr = lang === "ar";
+    const t = content[lang];
 
     useEffect(() => {
         async function runAnalysis() {
             if (!url) {
-                setError("Missing URL. Go back and paste a valid URL.");
+                setError(t.missingUrl);
                 return;
             }
 
@@ -41,9 +65,7 @@ function AnalyzeContent() {
                 if (!response.ok) {
                     const message = data.error || "Analysis failed.";
                     if (message.startsWith("BLOCKED:")) {
-                        setError(
-                            "This site blocks automated tools from reading it directly. Try copying the link to its Terms of Service or Privacy Policy page yourself and paste that instead."
-                        );
+                        setError(t.blocked);
                     } else {
                         setError(message);
                     }
@@ -51,21 +73,24 @@ function AnalyzeContent() {
                 }
 
                 router.replace(`/results?id=${data.id}`);
-     } catch (error) {
-    console.error("Analysis error:", error);
-setError(error instanceof Error ? error.message : "Could not connect to API.");}
+            } catch (error) {
+                console.error("Analysis error:", error);
+                setError(error instanceof Error ? error.message : t.connectError);
+            }
         }
 
         runAnalysis();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [url, lang, router]);
 
     return (
         <div
+            dir={isAr ? "rtl" : "ltr"}
             style={{
                 minHeight: "100vh",
                 background: isDark
                     ? "linear-gradient(180deg, #0a0e1a 0%, #111827 100%)"
-                    : "linear-gradient(180deg, #eef2f8 0%, #dbe4f0 100%)",
+                    : "#ffffff",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -78,11 +103,12 @@ setError(error instanceof Error ? error.message : "Could not connect to API.");}
                 style={{
                     maxWidth: 480,
                     width: "100%",
-                    background: isDark ? "#111827" : "#ffffff",
+                    background: isDark ? "#111827" : "#f4f7fb",
+                    border: isDark ? "1px solid #334155" : "1px solid #e2e8f0",
                     borderRadius: 16,
                     boxShadow: isDark
                         ? "0 8px 30px rgba(0, 0, 0, 0.4)"
-                        : "0 8px 30px rgba(30, 58, 95, 0.12)",
+                        : "0 8px 30px rgba(99, 102, 241, 0.1)",
                     padding: "40px 32px",
                     textAlign: "center"
                 }}
@@ -99,7 +125,7 @@ setError(error instanceof Error ? error.message : "Could not connect to API.");}
                             gap: 4
                         }}
                     >
-                        ← Back
+                        {t.back}
                     </Link>
                 </div>
 
@@ -114,31 +140,32 @@ setError(error instanceof Error ? error.message : "Could not connect to API.");}
                                 width: 48,
                                 height: 48,
                                 margin: "0 auto 20px",
-                                border: isDark ? "4px solid #334155" : "4px solid #dbe4f0",
-                                borderTopColor: "#274870",
+                                border: isDark ? "4px solid #334155" : "4px solid #e2e8f0",
+                                borderTopColor: "#6366f1",
                                 borderRadius: "50%",
                                 animation: "spin 0.9s linear infinite"
                             }}
                         />
-                        <h1 style={{ margin: "0 0 8px", fontSize: "1.4rem", color: isDark ? "#f1f1f1" : "#1e3a5f", fontWeight: 700 }}>
-                            Analyzing...
+                        <h1 style={{ margin: "0 0 8px", fontSize: "1.4rem", color: isDark ? "#f1f1f1" : "#1e293b", fontWeight: 700 }}>
+                            {t.analyzing}
                         </h1>
                         <p style={{ margin: "0 0 16px", color: isDark ? "#94a3b8" : "#64748b", fontSize: "0.95rem" }}>
-                            Please wait while we process the policy.
+                            {t.wait}
                         </p>
                     </>
                 ) : (
                     <h1 style={{ margin: "0 0 16px", fontSize: "1.4rem", color: isDark ? "#f87171" : "#991b1b", fontWeight: 700 }}>
-                        Analysis Failed
+                        {t.failed}
                     </h1>
                 )}
 
                 {url && (
                     <p
+                        dir="ltr"
                         style={{
                             wordBreak: "break-all",
-                            background: isDark ? "#1e293b" : "#f4f7fb",
-                            border: isDark ? "1px solid #334155" : "1px solid #dbe4f0",
+                            background: isDark ? "#1e293b" : "#eef2f8",
+                            border: isDark ? "1px solid #334155" : "1px solid #e2e8f0",
                             borderRadius: 10,
                             padding: "10px 14px",
                             color: isDark ? "#cbd5e1" : "#334155",

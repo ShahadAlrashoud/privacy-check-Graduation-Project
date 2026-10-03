@@ -28,12 +28,19 @@ function SunIcon({ color }: { color: string }) {
     );
 }
 
+const content = {
+    en: { home: "Home", analyze: "Analyze", about: "About", login: "Login" },
+    ar: { home: "الرئيسية", analyze: "تحليل", about: "من نحن", login: "تسجيل الدخول" }
+};
+
 export default function Header() {
     const { isDark, toggleTheme, lang, setLang } = (() => {
         const t = useTheme();
         return { isDark: t.theme === "dark", toggleTheme: t.toggleTheme, lang: t.lang, setLang: t.setLang };
     })();
 
+    const isAr = lang === "ar";
+    const t = content[lang];
     const iconColor = "#6366f1";
 
     const linkStyle = {
@@ -45,24 +52,27 @@ export default function Header() {
 
     return (
         <div
-            dir="ltr"
+            dir={isAr ? "rtl" : "ltr"}
             style={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "space-between",
+                display: "grid",
+                gridTemplateColumns: "1fr auto 1fr",
                 alignItems: "center",
                 padding: "14px 24px",
                 borderBottom: isDark ? "1px solid #1e293b" : "1px solid #e2e8f0"
             }}
         >
-            <BYANLogo isDark={isDark} size="sm" rotate={false} />
+            <div style={{ justifySelf: "start" }}>
+                <BYANLogo isDark={isDark} size="sm" rotate={false} />
+            </div>
 
-            <nav style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: 20 }}>
-                <Link href="/" style={linkStyle}>Home</Link>
-                <Link href="/analyze" style={linkStyle}>Analyze</Link>
-                <Link href="/about" style={linkStyle}>About</Link>
-                <Link href="/login" style={linkStyle}>Login</Link>
+            <nav style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: 28, justifySelf: "center" }}>
+                <Link href="/" style={linkStyle}>{t.home}</Link>
+                <Link href="/analyze" style={linkStyle}>{t.analyze}</Link>
+                <Link href="/about" style={linkStyle}>{t.about}</Link>
+                <Link href="/login" style={linkStyle}>{t.login}</Link>
+            </nav>
 
+            <div style={{ display: "flex", alignItems: "center", gap: 14, justifySelf: "end" }}>
                 <div style={{ display: "flex", gap: 6 }}>
                     <button
                         type="button"
@@ -112,7 +122,7 @@ export default function Header() {
                 >
                     {isDark ? <SunIcon color={iconColor} /> : <MoonIcon color={iconColor} />}
                 </button>
-            </nav>
+            </div>
         </div>
     );
 }
