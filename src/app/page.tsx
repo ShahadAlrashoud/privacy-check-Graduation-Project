@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "./providers";
 import BYANLogo from "./components/BYANLogo";
@@ -50,19 +50,6 @@ function IconSparkle({ color }: { color: string }) {
     );
 }
 
-function IconDoc({ color }: { color: string }) {
-    return (
-        <svg width="120" height="150" viewBox="0 0 120 150" fill="none">
-            <rect x="10" y="5" width="100" height="140" rx="6" stroke={color} strokeWidth="2" fill="none" />
-            <line x1="26" y1="35" x2="94" y2="35" stroke={color} strokeWidth="2" />
-            <line x1="26" y1="50" x2="94" y2="50" stroke={color} strokeWidth="2" />
-            <line x1="26" y1="65" x2="70" y2="65" stroke={color} strokeWidth="2" />
-            <circle cx="60" cy="100" r="26" fill={color} opacity="0.12" />
-            <path d="M48 100l8 8 16-16" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-        </svg>
-    );
-}
-
 export default function HomePage() {
     const [url, setUrl] = useState("");
     const [error, setError] = useState("");
@@ -70,6 +57,7 @@ export default function HomePage() {
     const router = useRouter();
     const { theme } = useTheme();
     const isDark = theme === "dark";
+    const groupRef = useRef<HTMLDivElement>(null);
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -81,7 +69,33 @@ export default function HomePage() {
         router.push(`/analyze?url=${encodeURIComponent(url.trim())}&lang=${lang}`);
     }
 
-    const iconColor = "#5b7ba8";
+    function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+        const el = groupRef.current;
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const rotateX = ((y - centerY) / centerY) * -8;
+        const rotateY = ((x - centerX) / centerX) * 8;
+        el.style.transform = `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+
+        const moveX = (x - centerX) / centerX;
+        const moveY = (y - centerY) / centerY;
+        el.style.setProperty("--mx", moveX.toString());
+        el.style.setProperty("--my", moveY.toString());
+    }
+
+    function handleMouseLeave() {
+        const el = groupRef.current;
+        if (!el) return;
+        el.style.transform = "perspective(900px) rotateX(0deg) rotateY(0deg)";
+        el.style.setProperty("--mx", "0");
+        el.style.setProperty("--my", "0");
+    }
+
+    const iconColor = "#6366f1";
 
     const features = [
         { Icon: IconDocument, title: "Terms of Service", text: "Understand what you're agreeing to." },
@@ -120,46 +134,11 @@ export default function HomePage() {
                     </div>
 
                     <h1 style={{ fontSize: "2.6rem", fontWeight: 800, margin: "0 0 20px", lineHeight: 1.2 }}>
-                        Before You <span style={{ color: "#5b7ba8" }}>Agree</span>
+                        Before You <span style={{ color: "#6366f1" }}>Agree</span>
                     </h1>
                     <p style={{ fontSize: "1.05rem", color: isDark ? "#94a3b8" : "#64748b", margin: "0 0 24px", lineHeight: 1.6 }}>
                         Know your rights. Understand your terms.
                     </p>
-
-                    <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-                        <button
-                            type="button"
-                            onClick={() => setLang("en")}
-                            style={{
-                                border: lang === "en" ? "1.5px solid #274870" : isDark ? "1.5px solid #334155" : "1.5px solid #e2e8f0",
-                                background: lang === "en" ? "#274870" : "transparent",
-                                color: lang === "en" ? "#fff" : isDark ? "#94a3b8" : "#64748b",
-                                borderRadius: 8,
-                                padding: "6px 14px",
-                                fontSize: "0.85rem",
-                                fontWeight: 600,
-                                cursor: "pointer"
-                            }}
-                        >
-                            EN
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setLang("ar")}
-                            style={{
-                                border: lang === "ar" ? "1.5px solid #274870" : isDark ? "1.5px solid #334155" : "1.5px solid #e2e8f0",
-                                background: lang === "ar" ? "#274870" : "transparent",
-                                color: lang === "ar" ? "#fff" : isDark ? "#94a3b8" : "#64748b",
-                                borderRadius: 8,
-                                padding: "6px 14px",
-                                fontSize: "0.85rem",
-                                fontWeight: 600,
-                                cursor: "pointer"
-                            }}
-                        >
-                            AR
-                        </button>
-                    </div>
 
                     <form
                         onSubmit={handleSubmit}
@@ -194,7 +173,7 @@ export default function HomePage() {
                                 border: "none",
                                 borderRadius: 10,
                                 padding: "13px 26px",
-                                background: "linear-gradient(135deg, #274870 0%, #5b7ba8 100%)",
+                                background: "linear-gradient(135deg, #6366f1 0%, #5b7ba8 100%)",
                                 color: "#fff",
                                 fontWeight: 700,
                                 fontSize: "0.95rem",
@@ -212,7 +191,18 @@ export default function HomePage() {
                 </div>
 
                 <div style={{ display: "flex", justifyContent: "center" }} className="byan-hero-art">
-                    <IconDoc color={iconColor} />
+                    <div
+                        ref={groupRef}
+                        className="illustration-group"
+                        onMouseMove={handleMouseMove}
+                        onMouseLeave={handleMouseLeave}
+                    >
+                        <img className="illustration-blob" src="/blob-bg.png" alt="" />
+                        <img className="illustration-card illustration-card-1" src="/document-card.png" alt="Terms of Service" />
+                        <img className="illustration-card illustration-card-2" src="/document-card-2.png" alt="Privacy Policy" />
+                        <img className="illustration-sparkle illustration-sparkle-1" src="/sparkle-accent.png" alt="" />
+                        <img className="illustration-sparkle illustration-sparkle-2" src="/sparkle-accent.png" alt="" />
+                    </div>
                 </div>
             </div>
 
@@ -262,6 +252,53 @@ export default function HomePage() {
                     .byan-hero form {
                         margin: 0 auto;
                     }
+                }
+
+                .illustration-group {
+                    position: relative;
+                    width: 320px;
+                    height: 300px;
+                    transition: transform 0.15s ease-out;
+                    transform-style: preserve-3d;
+                }
+
+                .illustration-blob {
+                    position: absolute;
+                    inset: -40px;
+                    width: calc(100% + 80px);
+                    z-index: 0;
+                    transition: transform 0.2s ease-out;
+                    transform: translate(calc(var(--mx, 0) * -10px), calc(var(--my, 0) * -10px));
+                }
+
+                .illustration-card {
+                    position: absolute;
+                    width: 220px;
+                    border-radius: 12px;
+                    transition: transform 0.2s ease-out;
+                }
+                .illustration-card-1 {
+                    top: 10px; left: 0px; z-index: 1;
+                    transform: rotate(-4deg) translateZ(20px) translate(calc(var(--mx, 0) * 6px), calc(var(--my, 0) * 6px));
+                }
+                .illustration-card-2 {
+                    top: 60px; left: 70px; z-index: 2;
+                    transform: rotate(3deg) translateZ(40px) translate(calc(var(--mx, 0) * 10px), calc(var(--my, 0) * 10px));
+                }
+
+                .illustration-sparkle {
+                    position: absolute;
+                    width: 20px;
+                    z-index: 4;
+                    transition: transform 0.2s ease-out;
+                }
+                .illustration-sparkle-1 {
+                    top: 0; right: 10px;
+                    transform: translateZ(70px) translate(calc(var(--mx, 0) * 18px), calc(var(--my, 0) * 18px));
+                }
+                .illustration-sparkle-2 {
+                    top: 80px; right: -10px;
+                    transform: translateZ(70px) translate(calc(var(--mx, 0) * -16px), calc(var(--my, 0) * -16px));
                 }
             `}</style>
         </div>

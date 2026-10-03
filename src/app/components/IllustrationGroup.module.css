@@ -1,0 +1,36 @@
+.illustrationGroup {
+  position: relative;
+  width: 300px;
+  height: 250px;
+}
+
+.card {
+  position: absolute;
+  width: 160px;
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+.card1 { top: 10px; left: 20px; transform: rotate(-4deg); z-index: 1; }
+.card2 { top: 40px; left: 70px; transform: rotate(3deg); z-index: 2; }
+
+.shield {
+  position: absolute;
+  width: 90px;
+  bottom: 0;
+  left: 90px;
+  z-index: 3;
+  transition: transform 0.35s ease;
+}
+
+.sparkle {
+  position: absolute;
+  width: 24px;
+  transition: transform 0.4s ease;
+}
+.sparkle1 { top: 0; right: 30px; }
+.sparkle2 { top: 60px; right: 0; }
+
+.illustrationGroup:hover .card1 { transform: translateY(-6px) rotate(-8deg); }
+.illustrationGroup:hover .card2 { transform: translateY(-12px) rotate(6deg); }
+.illustrationGroup:hover .shield { transform: translateY(-10px) scale(1.08); }
+.illustrationGroup:hover .sparkle1 { transform: translate(4px, -6px) rotate(20deg); }
+.illustrationGroup:hover .sparkle2 { transform: translate(-4px, -10px) rotate(-20deg); }
