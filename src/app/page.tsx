@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "./providers";
 import BYANLogo from "./components/BYANLogo";
@@ -50,19 +50,53 @@ function IconSparkle({ color }: { color: string }) {
     );
 }
 
+const content = {
+    en: {
+        heroTitlePrefix: "Before You ",
+        heroTitleAccent: "Agree",
+        heroSubtitle: "Know your rights. Understand your terms.",
+        placeholder: "Enter website URL (e.g. example.com)",
+        button: "Analyze Website →",
+        errorMsg: "Please enter a URL.",
+        helperText: "Quick. Simple. Clear. Results follow the language of the actual policy.",
+        features: [
+            { title: "Terms of Service", text: "Understand what you're agreeing to." },
+            { title: "Privacy Policy", text: "See how your data is collected and used." },
+            { title: "Potential Risks", text: "Spot clauses that may matter to you." },
+            { title: "Plain Language", text: "Complex legal language, made simple — in English or Arabic." }
+        ]
+    },
+    ar: {
+        heroTitlePrefix: "قبل أن ",
+        heroTitleAccent: "توافق",
+        heroSubtitle: "اعرف حقوقك. افهم شروطك.",
+        placeholder: "أدخل رابط الموقع (مثال: example.com)",
+        button: "← تحليل الموقع",
+        errorMsg: "الرجاء إدخال رابط.",
+        helperText: "سريع. بسيط. واضح. تُعرض النتائج بلغة السياسة الفعلية.",
+        features: [
+            { title: "شروط الخدمة", text: "افهم ما الذي توافق عليه." },
+            { title: "سياسة الخصوصية", text: "تعرّف على كيفية جمع بياناتك واستخدامها." },
+            { title: "المخاطر المحتملة", text: "اكتشف البنود التي قد تهمك." },
+            { title: "لغة مبسطة", text: "لغة قانونية معقدة، مبسطة — بالعربية أو الإنجليزية." }
+        ]
+    }
+};
+
 export default function HomePage() {
     const [url, setUrl] = useState("");
     const [error, setError] = useState("");
-    const [lang, setLang] = useState<"en" | "ar">("en");
     const router = useRouter();
-    const { theme } = useTheme();
+    const { theme, lang } = useTheme();
     const isDark = theme === "dark";
+    const isAr = lang === "ar";
+    const t = content[lang];
     const groupRef = useRef<HTMLDivElement>(null);
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         if (!url.trim()) {
-            setError("Please enter a URL.");
+            setError(t.errorMsg);
             return;
         }
         setError("");
@@ -96,16 +130,12 @@ export default function HomePage() {
     }
 
     const iconColor = "#6366f1";
-
-    const features = [
-        { Icon: IconDocument, title: "Terms of Service", text: "Understand what you're agreeing to." },
-        { Icon: IconShield, title: "Privacy Policy", text: "See how your data is collected and used." },
-        { Icon: IconWarning, title: "Potential Risks", text: "Spot clauses that may matter to you." },
-        { Icon: IconSparkle, title: "Plain Language", text: "Complex legal language, made simple — in English or Arabic." }
-    ];
+    const icons = [IconDocument, IconShield, IconWarning, IconSparkle];
+    const features = t.features.map((f, i) => ({ ...f, Icon: icons[i] }));
 
     return (
         <div
+            dir={isAr ? "rtl" : "ltr"}
             style={{
                 minHeight: "100vh",
                 background: isDark
@@ -122,26 +152,27 @@ export default function HomePage() {
                     margin: "0 auto",
                     padding: "70px 24px 50px",
                     display: "grid",
-                    gridTemplateColumns: "1.1fr 0.9fr",
+                    gridTemplateColumns: isAr ? "0.9fr 1.1fr" : "1.1fr 0.9fr",
                     gap: 40,
                     alignItems: "center"
                 }}
                 className="byan-hero"
             >
-                <div>
-                    <div style={{ marginBottom: 28 }}>
-                        <BYANLogo isDark={isDark} size="lg" />
-                    </div>
+                <div style={{ order: isAr ? 2 : 1, textAlign: isAr ? "right" : "left" }}>
+                   <div style={{ marginBottom: 28 }} dir="ltr">  
+    <BYANLogo isDark={isDark} size="lg" />  
+</div>
 
                     <h1 style={{ fontSize: "2.6rem", fontWeight: 800, margin: "0 0 20px", lineHeight: 1.2 }}>
-                        Before You <span style={{ color: "#6366f1" }}>Agree</span>
+                        {t.heroTitlePrefix}<span style={{ color: "#6366f1" }}>{t.heroTitleAccent}</span>
                     </h1>
                     <p style={{ fontSize: "1.05rem", color: isDark ? "#94a3b8" : "#64748b", margin: "0 0 24px", lineHeight: 1.6 }}>
-                        Know your rights. Understand your terms.
+                        {t.heroSubtitle}
                     </p>
 
                     <form
                         onSubmit={handleSubmit}
+                        dir={isAr ? "rtl" : "ltr"}
                         style={{
                             display: "flex",
                             gap: 10,
@@ -149,14 +180,15 @@ export default function HomePage() {
                             border: isDark ? "1px solid #334155" : "1px solid #e2e8f0",
                             borderRadius: 14,
                             padding: 8,
-                            maxWidth: 480
+                            maxWidth: 480,
+                            marginInline: isAr ? "0 0 0 auto" : undefined
                         }}
                     >
                         <input
                             type="text"
                             value={url}
                             onChange={(e) => setUrl(e.target.value)}
-                            placeholder="Enter website URL (e.g. example.com)"
+                            placeholder={t.placeholder}
                             style={{
                                 flex: 1,
                                 border: "none",
@@ -164,7 +196,8 @@ export default function HomePage() {
                                 outline: "none",
                                 padding: "10px 12px",
                                 fontSize: "0.95rem",
-                                color: isDark ? "#f1f1f1" : "#1e293b"
+                                color: isDark ? "#f1f1f1" : "#1e293b",
+                                textAlign: isAr ? "right" : "left"
                             }}
                         />
                         <button
@@ -181,16 +214,16 @@ export default function HomePage() {
                                 whiteSpace: "nowrap"
                             }}
                         >
-                            Analyze Website →
+                            {t.button}
                         </button>
                     </form>
                     {error && <p style={{ color: "#dc2626", fontSize: "0.85rem", marginTop: 10 }}>{error}</p>}
                     <p style={{ marginTop: 14, fontSize: "0.8rem", color: isDark ? "#64748b" : "#94a3b8" }}>
-                        Quick. Simple. Clear. Results follow the language of the actual policy.
+                        {t.helperText}
                     </p>
                 </div>
 
-                <div style={{ display: "flex", justifyContent: "center" }} className="byan-hero-art">
+                <div style={{ display: "flex", justifyContent: "center", order: isAr ? 1 : 2 }} className="byan-hero-art">
                     <div
                         ref={groupRef}
                         className="illustration-group"
@@ -247,7 +280,7 @@ export default function HomePage() {
                         text-align: center;
                     }
                     .byan-hero-art {
-                        order: -1;
+                        order: -1 !important;
                     }
                     .byan-hero form {
                         margin: 0 auto;

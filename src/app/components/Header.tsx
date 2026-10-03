@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { useTheme } from "../providers";
 import BYANLogo from "./BYANLogo";
@@ -30,16 +29,15 @@ function SunIcon({ color }: { color: string }) {
 }
 
 export default function Header() {
-    const { isDark, toggleTheme } = (() => {
+    const { isDark, toggleTheme, lang, setLang } = (() => {
         const t = useTheme();
-        return { isDark: t.theme === "dark", toggleTheme: t.toggleTheme };
+        return { isDark: t.theme === "dark", toggleTheme: t.toggleTheme, lang: t.lang, setLang: t.setLang };
     })();
 
-    const [lang, setLang] = useState<"en" | "ar">("en");
-    const iconColor = "#5b7ba8";
+    const iconColor = "#6366f1";
 
     const linkStyle = {
-        color: isDark ? "#dbe4f0" : "#274870",
+        color: isDark ? "#dbe4f0" : "#4338ca",
         textDecoration: "none",
         fontSize: "0.9rem",
         fontWeight: 500
@@ -70,8 +68,8 @@ export default function Header() {
                         type="button"
                         onClick={() => setLang("en")}
                         style={{
-                            border: lang === "en" ? "1.5px solid #274870" : isDark ? "1.5px solid #334155" : "1.5px solid #e2e8f0",
-                            background: lang === "en" ? "#274870" : "transparent",
+                            border: lang === "en" ? "1.5px solid #6366f1" : isDark ? "1.5px solid #334155" : "1.5px solid #e2e8f0",
+                            background: lang === "en" ? "#6366f1" : "transparent",
                             color: lang === "en" ? "#fff" : isDark ? "#94a3b8" : "#64748b",
                             borderRadius: 8,
                             padding: "4px 10px",
@@ -86,8 +84,8 @@ export default function Header() {
                         type="button"
                         onClick={() => setLang("ar")}
                         style={{
-                            border: lang === "ar" ? "1.5px solid #274870" : isDark ? "1.5px solid #334155" : "1.5px solid #e2e8f0",
-                            background: lang === "ar" ? "#274870" : "transparent",
+                            border: lang === "ar" ? "1.5px solid #6366f1" : isDark ? "1.5px solid #334155" : "1.5px solid #e2e8f0",
+                            background: lang === "ar" ? "#6366f1" : "transparent",
                             color: lang === "ar" ? "#fff" : isDark ? "#94a3b8" : "#64748b",
                             borderRadius: 8,
                             padding: "4px 10px",
