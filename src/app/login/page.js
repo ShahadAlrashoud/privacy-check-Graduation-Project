@@ -14,7 +14,8 @@ const content = {
         button: "Log In",
         invalid: "Invalid email or password.",
         noAccount: "Don't have an account?",
-        signup: "Sign up"
+        signup: "Sign up",
+        serverError: "Could not reach auth server.",
     },
     ar: {
         title: "تسجيل الدخول",
@@ -23,8 +24,9 @@ const content = {
         button: "تسجيل الدخول",
         invalid: "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
         noAccount: "ليس لديك حساب؟",
-        signup: "إنشاء حساب"
-    }
+        signup: "إنشاء حساب",
+        serverError: "تعذر الاتصال بخادم تسجيل الدخول.",
+    },
 };
 
 export default function LoginPage() {
@@ -32,7 +34,8 @@ export default function LoginPage() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const router = useRouter();
-    const { theme, lang, setLang } = useTheme();
+    const { theme, lang } = useTheme();
+
     const isDark = theme === "dark";
     const isAr = lang === "ar";
     const t = content[lang];
@@ -41,53 +44,34 @@ export default function LoginPage() {
         e.preventDefault();
         setError("");
 
-        const result = await signIn("credentials", {
-            email,
-            password,
-            redirect: false
-        });
+        try {
+            const result = await signIn("credentials", {
+                email,
+                password,
+                redirect: false,
+                callbackUrl: "/",
+            });
 
-        if (result?.error) {
-            setError(t.invalid);
-            return;
+            if (!result) {
+                setError(t.serverError);
+                return;
+            }
+
+            if (result.error) {
+                setError(result.error === "CredentialsSignin" ? t.invalid : t.serverError);
+                return;
+            }
+
+            router.push(result.url || "/");
+        } catch {
+            setError(t.serverError);
         }
-
-        router.push("/");
     }
 
     return (
-        <div
-            dir={isAr ? "rtl" : "ltr"}
-            style={{
-                minHeight: "100vh",
-                background: isDark
-                    ? "linear-gradient(180deg, #0a0e1a 0%, #111827 100%)"
-                    : "#ffffff",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "24px",
-                fontFamily: "Segoe UI, Arial, sans-serif"
-            }}
-        >
-            <div
-                style={{
-                    maxWidth: 420,
-                    width: "100%",
-                    background: isDark ? "#111827" : "#f4f7fb",
-                    border: isDark ? "1px solid #334155" : "1px solid #e2e8f0",
-                    borderRadius: 16,
-                    boxShadow: isDark
-                        ? "0 8px 30px rgba(0, 0, 0, 0.4)"
-                        : "0 8px 30px rgba(99, 102, 241, 0.1)",
-                    padding: "40px 32px"
-                }}
-            >
-
-
-                <h1 style={{ margin: "0 0 24px", fontSize: "1.5rem", color: isDark ? "#f1f1f1" : "#1e293b", textAlign: "center" }}>
-                    {t.title}
-                </h1>
+        <div dir={isAr ? "rtl" : "ltr"} style={wrap(isDark)}>
+            <div style={card(isDark)}>
+                <h1 style={h1(isDark)}>{t.title}</h1>
 
                 <form onSubmit={handleSubmit}>
                     <input
@@ -96,19 +80,7 @@ export default function LoginPage() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
-                        dir={isAr ? "rtl" : "ltr"}
-                        style={{
-                            width: "100%",
-                            padding: "12px 16px",
-                            borderRadius: 10,
-                            border: isDark ? "1px solid #334155" : "1px solid #dbe4f0",
-                            background: isDark ? "#0f172a" : "#ffffff",
-                            color: isDark ? "#f1f1f1" : "#1e293b",
-                            fontSize: "0.95rem",
-                            marginBottom: 12,
-                            boxSizing: "border-box",
-                            outline: "none"
-                        }}
+                        style={input(isDark)}
                     />
                     <input
                         type="password"
@@ -116,39 +88,12 @@ export default function LoginPage() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
-                        dir={isAr ? "rtl" : "ltr"}
-                        style={{
-                            width: "100%",
-                            padding: "12px 16px",
-                            borderRadius: 10,
-                            border: isDark ? "1px solid #334155" : "1px solid #dbe4f0",
-                            background: isDark ? "#0f172a" : "#ffffff",
-                            color: isDark ? "#f1f1f1" : "#1e293b",
-                            fontSize: "0.95rem",
-                            marginBottom: 16,
-                            boxSizing: "border-box",
-                            outline: "none"
-                        }}
+                        style={input(isDark)}
                     />
 
-                    {error && (
-                        <p style={{ color: "#dc2626", fontSize: "0.85rem", marginBottom: 12 }}>{error}</p>
-                    )}
+                    {error && <p style={{ color: "#dc2626", fontSize: "0.85rem", marginBottom: 12 }}>{error}</p>}
 
-                    <button
-                        type="submit"
-                        style={{
-                            width: "100%",
-                            padding: "12px 16px",
-                            borderRadius: 10,
-                            border: "none",
-                            background: "linear-gradient(135deg, #6366f1 0%, #5b7ba8 100%)",
-                            color: "#fff",
-                            fontWeight: 600,
-                            fontSize: "0.95rem",
-                            cursor: "pointer"
-                        }}
-                    >
+                    <button type="submit" style={btn}>
                         {t.button}
                     </button>
                 </form>
@@ -163,3 +108,63 @@ export default function LoginPage() {
         </div>
     );
 }
+
+function wrap(isDark) {
+    return {
+        minHeight: "100vh",
+        background: isDark
+            ? "linear-gradient(180deg, #0a0e1a 0%, #111827 100%)"
+            : "#ffffff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "24px",
+        fontFamily: "Segoe UI, Arial, sans-serif",
+    };
+}
+function card(isDark) {
+    return {
+        maxWidth: 420,
+        width: "100%",
+        background: isDark ? "#111827" : "#f4f7fb",
+        border: isDark ? "1px solid #334155" : "1px solid #e2e8f0",
+        borderRadius: 16,
+        boxShadow: isDark
+            ? "0 8px 30px rgba(0,0,0,0.4)"
+            : "0 8px 30px rgba(99,102,241,0.1)",
+        padding: "40px 32px",
+    };
+}
+function h1(isDark) {
+    return {
+        margin: "0 0 24px",
+        fontSize: "1.5rem",
+        color: isDark ? "#f1f1f1" : "#1e293b",
+        textAlign: "center",
+    };
+}
+function input(isDark) {
+    return {
+        width: "100%",
+        padding: "12px 16px",
+        borderRadius: 10,
+        border: isDark ? "1px solid #334155" : "1px solid #dbe4f0",
+        background: isDark ? "#0f172a" : "#ffffff",
+        color: isDark ? "#f1f1f1" : "#1e293b",
+        fontSize: "0.95rem",
+        marginBottom: 12,
+        boxSizing: "border-box",
+        outline: "none",
+    };
+}
+const btn = {
+    width: "100%",
+    padding: "12px 16px",
+    borderRadius: 10,
+    border: "none",
+    background: "linear-gradient(135deg, #6366f1 0%, #5b7ba8 100%)",
+    color: "#fff",
+    fontWeight: 600,
+    fontSize: "0.95rem",
+    cursor: "pointer",
+};

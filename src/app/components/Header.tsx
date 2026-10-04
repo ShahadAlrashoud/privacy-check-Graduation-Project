@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useTheme } from "../providers";
 import BYANLogo from "./BYANLogo";
+import UserMenu from "./UserMenu";
 
 function MoonIcon({ color }: { color: string }) {
     return (
@@ -29,8 +30,8 @@ function SunIcon({ color }: { color: string }) {
 }
 
 const content = {
-    en: { home: "Home", analyze: "Analyze", about: "About", login: "Login" },
-    ar: { home: "الرئيسية", analyze: "تحليل", about: "من نحن", login: "تسجيل الدخول" }
+    en: { home: "Home", analyze: "Analyze", about: "About" },
+    ar: { home: "الرئيسية", analyze: "تحليل", about: "من نحن" }
 };
 
 export default function Header() {
@@ -69,7 +70,6 @@ export default function Header() {
                 <Link href="/" style={linkStyle}>{t.home}</Link>
                 <Link href="/analyze" style={linkStyle}>{t.analyze}</Link>
                 <Link href="/about" style={linkStyle}>{t.about}</Link>
-                <Link href="/login" style={linkStyle}>{t.login}</Link>
             </nav>
 
             <div style={{ display: "flex", alignItems: "center", gap: 14, justifySelf: "end" }}>
@@ -122,6 +122,8 @@ export default function Header() {
                 >
                     {isDark ? <SunIcon color={iconColor} /> : <MoonIcon color={iconColor} />}
                 </button>
+
+                <UserMenu />
             </div>
         </div>
     );

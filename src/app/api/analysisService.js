@@ -1,6 +1,6 @@
 import { detectRiskClauses } from "../../../nlp/extractClauses";
 import { scoreRisk } from "../../../nlp/riskScorer";
-import { saveAnalysis } from "../../../database/mockDb";
+import { createAnalysis, saveResult } from "../../../database/mockDb";
 
 function isValidHttpUrl(value) {
     try {
@@ -223,7 +223,7 @@ Return ONLY valid JSON in this exact format:
     return JSON.parse(data.choices[0].message.content);
 }
 
-export async function runAnalysisForUrl(url, preferredLang = "en") {
+export async function runAnalysisForUrl(url, preferredLang = "en", userId = null) {
     if (!isValidHttpUrl(url)) {
         throw new Error("Invalid URL");
     }
@@ -247,6 +247,7 @@ export async function runAnalysisForUrl(url, preferredLang = "en") {
 
     const record = {
         id: crypto.randomUUID(),
+        userId,
         url,
         resolvedUrl,
         lang,
@@ -258,6 +259,22 @@ export async function runAnalysisForUrl(url, preferredLang = "en") {
         createdAt: new Date().toISOString()
     };
 
-    await saveAnalysis(record);
+    // Always save the full record so /api/result/[id] can retrieve it
+    await saveResult(record);
+
+    // Only add to the user's saved-analyses list if they're logged in
+    if (userId) {
+        await createAnalysis({
+            id: record.id,
+            userId: record.userId,
+            title: record.resolvedUrl || record.url,
+            query: record.url,
+            result: record.summaryEn,
+        });
+    }
+
+    return record;
+
+    return record;
     return record;
 }

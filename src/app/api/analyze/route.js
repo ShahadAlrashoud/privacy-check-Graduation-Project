@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/route";
 import { runAnalysisForUrl } from "../analysisService";
 
 export async function POST(request) {
@@ -14,7 +16,10 @@ export async function POST(request) {
             );
         }
 
-        const result = await runAnalysisForUrl(url, preferredLang);
+        const session = await getServerSession(authOptions);
+        const userId = session?.user?.id || null;
+
+        const result = await runAnalysisForUrl(url, preferredLang, userId);
 
         return NextResponse.json(
             { id: result.id },
@@ -33,4 +38,7 @@ export async function POST(request) {
             { status: 500 }
         );
     }
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id || null;
+    console.log("DEBUG session userId:", userId);
 }

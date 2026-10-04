@@ -134,7 +134,14 @@ function ResultsContent() {
             const res = await fetch("/api/save", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ analysisId: result.id })
+                body: JSON.stringify({
+                    analysisId: result.id,
+                    title: result.resolvedUrl || result.url,
+                    query: result.url,
+                    result: result.summaryEn,
+                    riskScore: result.riskScore,
+                    riskLevel: result.riskLevel,
+                })
             });
             if (!res.ok) throw new Error();
             setSaveStatus("saved");

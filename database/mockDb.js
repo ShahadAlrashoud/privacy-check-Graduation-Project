@@ -1,83 +1,80 @@
-import { neon } from "@neondatabase/serverless";
+// database/mockDb.js
 
-const sql = neon(process.env.DATABASE_URL);
+const users = [];
+const analyses = [];
+const results = new Map(); // full analysis records, keyed by id
 
-export async function saveAnalysis(record) {
-  await sql`
-    INSERT INTO analyses (id, url, risk_score, risk_level, summary_en, clauses, created_at, lang)
-    VALUES (
-      ${record.id},
-      ${record.url},
-      ${record.riskScore},
-      ${record.riskLevel},
-      ${record.summaryEn},
-      ${JSON.stringify(record.clauses)},
-      ${record.createdAt},
-      ${record.lang || "en"}
-    )
-  `;
+let userIdCounter = 1;
+let analysisIdCounter = 1;
+
+export async function getUserByEmail(email) {
+  if (!email) return null;
+  return users.find((u) => u.email.toLowerCase() === email.toLowerCase()) || null;
+}
+
+export async function getUserById(id) {
+  return users.find((u) => String(u.id) === String(id)) || null;
+}
+
+export async function createUser({ username, email, passwordHash }) {
+  const user = {
+    id: String(userIdCounter++),
+    username: username?.trim(),
+    email: email.toLowerCase(),
+    passwordHash,
+    createdAt: new Date().toISOString(),
+  };
+  users.push(user);
+  return user;
+}
+
+export async function saveResult(record) {
+  results.set(String(record.id), record);
+  return record;
 }
 
 export async function getAnalysisById(id) {
-  const rows = await sql`SELECT * FROM analyses WHERE id = ${id}`;
-  if (rows.length === 0) return null;
+  return results.get(String(id)) || null;
+}
 
-  const row = rows[0];
-  return {
-    id: row.id,
-    url: row.url,
-    riskScore: row.risk_score,
-    riskLevel: row.risk_level,
-    summaryEn: row.summary_en,
-    clauses: row.clauses,
-    createdAt: row.created_at,
-    lang: row.lang || "en"
+export async function createAnalysis({ id, userId, title, query, result, riskScore, riskLevel }) {
+  const item = {
+    id: String(id ?? analysisIdCounter++),
+    userId: String(userId),
+    title: title?.trim() || "Untitled Analysis",
+    query: query?.trim() || "",
+    result: result?.trim() || "",
+    riskScore: riskScore ?? null,
+    riskLevel: riskLevel ?? null,
+    createdAt: new Date().toISOString(),
   };
+  analyses.push(item);
+  return item;
 }
 
-export async function createUser({ email, passwordHash }) {
-  const rows = await sql`
-        INSERT INTO users (email, password_hash)
-        VALUES (${email}, ${passwordHash})
-        RETURNING id, email, created_at
-    `;
-  return rows[0];
+export async function deleteAnalysis(id, userId) {
+  const index = analyses.findIndex(
+    (a) => String(a.id) === String(id) && String(a.userId) === String(userId)
+  );
+  if (index === -1) return false;
+  analyses.splice(index, 1);
+  return true;
 }
 
-export async function getUserByEmail(email) {
-  const rows = await sql`SELECT * FROM users WHERE email = ${email}`;
-  if (rows.length === 0) return null;
+export async function listAnalysesByUser(userId, search = "") {
+  const q = search.trim().toLowerCase();
 
-  const row = rows[0];
-  return {
-    id: row.id,
-    email: row.email,
-    passwordHash: row.password_hash,
-    createdAt: row.created_at
-  };
-}
-export async function saveForUser(userId, analysisId) {
-  await sql`
-        INSERT INTO saved_analyses (user_id, analysis_id)
-        VALUES (${userId}, ${analysisId})
-        ON CONFLICT (user_id, analysis_id) DO NOTHING
-    `;
-}
+  const items = analyses
+    .filter((a) => String(a.userId) === String(userId))
+    .filter((a) => {
+      if (!q) return true;
+      return (
+        a.title.toLowerCase().includes(q) ||
+        a.query.toLowerCase().includes(q) ||
+        a.result.toLowerCase().includes(q)
+      );
+    })
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-export async function getSavedAnalysesForUser(userId) {
-  const rows = await sql`
-        SELECT a.id, a.url, a.risk_score, a.risk_level, a.summary_en, a.created_at
-        FROM saved_analyses sa
-        JOIN analyses a ON a.id = sa.analysis_id
-        WHERE sa.user_id = ${userId}
-        ORDER BY sa.created_at DESC
-    `;
-  return rows.map((row) => ({
-    id: row.id,
-    url: row.url,
-    riskScore: row.risk_score,
-    riskLevel: row.risk_level,
-    summaryEn: row.summary_en,
-    createdAt: row.created_at
-  }));
+  return items;
 }
