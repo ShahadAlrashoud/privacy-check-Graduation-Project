@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
-import { listAnalysesByUser } from "../../../../../database/mockDb";
+import { listAnalysesByUser } from "../../../../../database/db";
 
 export async function GET(request) {
     try {

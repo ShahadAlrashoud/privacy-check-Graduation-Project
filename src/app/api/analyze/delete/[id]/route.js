@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../auth/[...nextauth]/route";
-import { deleteAnalysis } from "../../../../../../database/mockDb";
+import { deleteAnalysis } from "../../../../../database/db";
 
 export async function DELETE(_request, { params }) {
     const session = await getServerSession(authOptions);

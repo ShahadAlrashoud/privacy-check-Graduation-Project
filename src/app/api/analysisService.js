@@ -1,6 +1,6 @@
 import { detectRiskClauses } from "../../../nlp/extractClauses";
 import { scoreRisk } from "../../../nlp/riskScorer";
-import { createAnalysis, saveResult } from "../../../database/mockDb";
+import { createAnalysis, saveResult } from "../../../../../database/db";
 
 function isValidHttpUrl(value) {
     try {
