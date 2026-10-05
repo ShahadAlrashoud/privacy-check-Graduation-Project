@@ -5,6 +5,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTheme } from "../providers";
+import { wrap, card, h1, input, btn, muted, PasswordField } from "../components/AuthShared";
 
 const content = {
     en: {
@@ -12,27 +13,36 @@ const content = {
         email: "Email",
         password: "Password",
         button: "Log In",
+        loading: "Logging in…",
+        forgot: "Forgot password?",
+        show: "Show password",
+        hide: "Hide password",
         invalid: "Invalid email or password.",
         noAccount: "Don't have an account?",
         signup: "Sign up",
-        serverError: "Could not reach auth server.",
+        serverError: "Could not reach auth server."
     },
     ar: {
         title: "تسجيل الدخول",
         email: "البريد الإلكتروني",
         password: "كلمة المرور",
         button: "تسجيل الدخول",
+        loading: "جارٍ تسجيل الدخول…",
+        forgot: "نسيت كلمة المرور؟",
+        show: "إظهار كلمة المرور",
+        hide: "إخفاء كلمة المرور",
         invalid: "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
         noAccount: "ليس لديك حساب؟",
         signup: "إنشاء حساب",
-        serverError: "تعذر الاتصال بخادم تسجيل الدخول.",
-    },
+        serverError: "تعذر الاتصال بخادم تسجيل الدخول."
+    }
 };
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
     const router = useRouter();
     const { theme, lang } = useTheme();
 
@@ -40,31 +50,32 @@ export default function LoginPage() {
     const isAr = lang === "ar";
     const t = content[lang];
 
-    async function handleSubmit(e) {
+    async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setError("");
+        setLoading(true);
 
         try {
             const result = await signIn("credentials", {
                 email,
                 password,
                 redirect: false,
-                callbackUrl: "/",
+                callbackUrl: "/"
             });
 
             if (!result) {
                 setError(t.serverError);
                 return;
             }
-
             if (result.error) {
                 setError(result.error === "CredentialsSignin" ? t.invalid : t.serverError);
                 return;
             }
-
             router.push(result.url || "/");
         } catch {
             setError(t.serverError);
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -79,26 +90,38 @@ export default function LoginPage() {
                         placeholder={t.email}
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        autoComplete="email"
                         required
                         style={input(isDark)}
                     />
-                    <input
-                        type="password"
-                        placeholder={t.password}
+                    <PasswordField
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        style={input(isDark)}
+                        onChange={setPassword}
+                        placeholder={t.password}
+                        isDark={isDark}
+                        autoComplete="current-password"
+                        showLabel={t.show}
+                        hideLabel={t.hide}
                     />
 
-                    {error && <p style={{ color: "#dc2626", fontSize: "0.85rem", marginBottom: 12 }}>{error}</p>}
+                    <div style={{ textAlign: "end", marginBottom: 16 }}>
+                        <Link href="/forgot-password" style={{ color: "#6366f1", fontSize: "0.85rem", fontWeight: 600, textDecoration: "none" }}>
+                            {t.forgot}
+                        </Link>
+                    </div>
 
-                    <button type="submit" style={btn}>
-                        {t.button}
+                    {error && (
+                        <p role="alert" style={{ color: "#dc2626", fontSize: "0.85rem", marginBottom: 12 }}>
+                            {error}
+                        </p>
+                    )}
+
+                    <button type="submit" disabled={loading} style={btn(loading)}>
+                        {loading ? t.loading : t.button}
                     </button>
                 </form>
 
-                <p style={{ textAlign: "center", marginTop: 16, fontSize: "0.9rem", color: isDark ? "#94a3b8" : "#64748b" }}>
+                <p style={{ textAlign: "center", marginTop: 16, fontSize: "0.9rem", color: muted(isDark) }}>
                     {t.noAccount}{" "}
                     <Link href="/signup" style={{ color: "#6366f1", fontWeight: 600 }}>
                         {t.signup}
@@ -108,63 +131,3 @@ export default function LoginPage() {
         </div>
     );
 }
-
-function wrap(isDark) {
-    return {
-        minHeight: "100vh",
-        background: isDark
-            ? "linear-gradient(180deg, #0a0e1a 0%, #111827 100%)"
-            : "#ffffff",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "24px",
-        fontFamily: "Segoe UI, Arial, sans-serif",
-    };
-}
-function card(isDark) {
-    return {
-        maxWidth: 420,
-        width: "100%",
-        background: isDark ? "#111827" : "#f4f7fb",
-        border: isDark ? "1px solid #334155" : "1px solid #e2e8f0",
-        borderRadius: 16,
-        boxShadow: isDark
-            ? "0 8px 30px rgba(0,0,0,0.4)"
-            : "0 8px 30px rgba(99,102,241,0.1)",
-        padding: "40px 32px",
-    };
-}
-function h1(isDark) {
-    return {
-        margin: "0 0 24px",
-        fontSize: "1.5rem",
-        color: isDark ? "#f1f1f1" : "#1e293b",
-        textAlign: "center",
-    };
-}
-function input(isDark) {
-    return {
-        width: "100%",
-        padding: "12px 16px",
-        borderRadius: 10,
-        border: isDark ? "1px solid #334155" : "1px solid #dbe4f0",
-        background: isDark ? "#0f172a" : "#ffffff",
-        color: isDark ? "#f1f1f1" : "#1e293b",
-        fontSize: "0.95rem",
-        marginBottom: 12,
-        boxSizing: "border-box",
-        outline: "none",
-    };
-}
-const btn = {
-    width: "100%",
-    padding: "12px 16px",
-    borderRadius: 10,
-    border: "none",
-    background: "linear-gradient(135deg, #6366f1 0%, #5b7ba8 100%)",
-    color: "#fff",
-    fontWeight: 600,
-    fontSize: "0.95rem",
-    cursor: "pointer",
-};

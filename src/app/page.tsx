@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "./providers";
+
+/* ---------- Icons ---------- */
 
 function IconDocument({ color }: { color: string }) {
     return (
@@ -49,6 +51,8 @@ function IconSparkle({ color }: { color: string }) {
     );
 }
 
+/* ---------- Content ---------- */
+
 const content = {
     en: {
         heroTitlePrefix: "Before You ",
@@ -58,12 +62,28 @@ const content = {
         button: "Analyze Website →",
         errorMsg: "Please enter a URL.",
         helperText: "Quick. Simple. Clear. Results follow the language of the actual policy.",
+
+        howTitle: "How it works",
+        steps: [
+            { title: "Enter a URL", text: "Paste any website's address." },
+            { title: "We read the fine print", text: "BYAN finds the Terms and Privacy Policy and analyzes them in Arabic or English." },
+            { title: "Get your Risk Score", text: "A clear 0–100 score with a plain-language summary." }
+        ],
+
+        featuresTitle: "What you get",
         features: [
             { title: "Terms of Service", text: "Understand what you're agreeing to." },
             { title: "Privacy Policy", text: "See how your data is collected and used." },
             { title: "Potential Risks", text: "Spot clauses that may matter to you." },
             { title: "Plain Language", text: "Complex legal language, made simple — in English or Arabic." }
-        ]
+        ],
+
+        legendTitle: "Know the risk at a glance",
+        legendText: "Every policy is distilled into a single Risk Score from 0 to 100, placed in one of three categories.",
+        legend: ["Safe", "Moderate Risk", "High Risk"],
+
+        ctaTitle: "Before you agree, know what you're agreeing to.",
+        ctaButton: "Try it now"
     },
     ar: {
         heroTitlePrefix: "قبل أن ",
@@ -73,18 +93,46 @@ const content = {
         button: "← تحليل الموقع",
         errorMsg: "الرجاء إدخال رابط.",
         helperText: "سريع. بسيط. واضح. تُعرض النتائج بلغة السياسة الفعلية.",
+
+        howTitle: "كيف يعمل",
+        steps: [
+            { title: "أدخل الرابط", text: "الصق عنوان أي موقع." },
+            { title: "نقرأ التفاصيل الدقيقة", text: "يعثر بيان على شروط الخدمة وسياسة الخصوصية ويحللها بالعربية أو الإنجليزية." },
+            { title: "احصل على درجة المخاطر", text: "درجة واضحة من 0 إلى 100 مع ملخص بلغة بسيطة." }
+        ],
+
+        featuresTitle: "ماذا ستحصل عليه",
         features: [
             { title: "شروط الخدمة", text: "افهم ما الذي توافق عليه." },
             { title: "سياسة الخصوصية", text: "تعرّف على كيفية جمع بياناتك واستخدامها." },
             { title: "المخاطر المحتملة", text: "اكتشف البنود التي قد تهمك." },
             { title: "لغة مبسطة", text: "لغة قانونية معقدة، مبسطة — بالعربية أو الإنجليزية." }
-        ]
+        ],
+
+        legendTitle: "اعرف مستوى الخطورة بنظرة واحدة",
+        legendText: "يتم تلخيص كل سياسة في درجة مخاطر واحدة من 0 إلى 100، تُصنَّف ضمن إحدى ثلاث فئات.",
+        legend: ["آمن", "متوسط الخطورة", "عالي الخطورة"],
+
+        ctaTitle: "قبل أن توافق، اعرف على ماذا توافق.",
+        ctaButton: "جرّب الآن"
     }
 };
+
+const ACCENT = "#6366f1";
+
+// Same colors as the results page
+const LEGEND_COLORS = [
+    { ring: "#86d9a4", bg: "#eafcf1", text: "#4a8f68" },
+    { ring: "#f2c96b", bg: "#fdf6e3", text: "#a17f2d" },
+    { ring: "#f19a9a", bg: "#fdecec", text: "#c06a6a" }
+];
+
+/* ---------- Page ---------- */
 
 export default function HomePage() {
     const [url, setUrl] = useState("");
     const [error, setError] = useState("");
+    const inputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
     const { theme, lang } = useTheme();
     const isDark = theme === "dark";
@@ -101,20 +149,40 @@ export default function HomePage() {
         router.push(`/analyze?url=${encodeURIComponent(url.trim())}&lang=${lang}`);
     }
 
-    const iconColor = "#6366f1";
+    function focusInput() {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        setTimeout(() => inputRef.current?.focus(), 400);
+    }
+
     const icons = [IconDocument, IconShield, IconWarning, IconSparkle];
     const features = t.features.map((f, i) => ({ ...f, Icon: icons[i] }));
+
+    const colors = {
+        pageBg: isDark ? "linear-gradient(180deg, #0a0e1a 0%, #111827 100%)" : "#ffffff",
+        altBg: isDark ? "#0f172a" : "#f8fafc",
+        heading: isDark ? "#f1f1f1" : "#1e293b",
+        body: isDark ? "#94a3b8" : "#64748b",
+        line: isDark ? "#1e293b" : "#e2e8f0",
+        iconBox: isDark ? "#1e293b" : "#eef2f8",
+        soft: isDark ? "rgba(99, 102, 241, 0.15)" : "#eef0ff"
+    };
+
+    const sectionTitle = {
+        margin: "0 0 32px",
+        textAlign: "center" as const,
+        fontSize: "1.4rem",
+        fontWeight: 800,
+        color: colors.heading
+    };
 
     return (
         <div
             dir={isAr ? "rtl" : "ltr"}
             style={{
                 minHeight: "100vh",
-                background: isDark
-                    ? "linear-gradient(180deg, #0a0e1a 0%, #111827 100%)"
-                    : "#ffffff",
+                background: colors.pageBg,
                 fontFamily: "Segoe UI, Arial, sans-serif",
-                color: isDark ? "#f1f1f1" : "#1e293b",
+                color: colors.heading,
                 display: "flex",
                 flexDirection: "column"
             }}
@@ -131,9 +199,10 @@ export default function HomePage() {
                 className="byan-hero"
             >
                 <h1 style={{ fontSize: "2.6rem", fontWeight: 800, margin: "0 0 20px", lineHeight: 1.2 }}>
-                    {t.heroTitlePrefix}<span style={{ color: "#6366f1" }}>{t.heroTitleAccent}</span>
+                    {t.heroTitlePrefix}
+                    <span style={{ color: ACCENT }}>{t.heroTitleAccent}</span>
                 </h1>
-                <p style={{ fontSize: "1.05rem", color: isDark ? "#94a3b8" : "#64748b", margin: "0 0 24px", lineHeight: 1.6 }}>
+                <p style={{ fontSize: "1.05rem", color: colors.body, margin: "0 0 24px", lineHeight: 1.6 }}>
                     {t.heroSubtitle}
                 </p>
 
@@ -151,6 +220,8 @@ export default function HomePage() {
                     }}
                 >
                     <input
+                        ref={inputRef}
+                        id="analyze-input"
                         type="text"
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
@@ -162,7 +233,7 @@ export default function HomePage() {
                             outline: "none",
                             padding: "10px 12px",
                             fontSize: "0.95rem",
-                            color: isDark ? "#f1f1f1" : "#1e293b",
+                            color: colors.heading,
                             textAlign: isAr ? "right" : "left"
                         }}
                     />
@@ -190,58 +261,153 @@ export default function HomePage() {
             </div>
 
             {/* Divider */}
-            <div
-                style={{
-                    width: "100%",
-                    height: 1,
-                    background: isDark ? "#1e293b" : "#e2e8f0"
-                }}
-            />
+            <div style={{ width: "100%", height: 1, background: colors.line }} />
 
-            {/* Features — fills remaining page height */}
-            <div
-                style={{
-                    flex: 1,
-                    width: "100%",
-                    background: isDark ? "#0f172a" : "#f8fafc",
-                    display: "flex",
-                    alignItems: "flex-start",
-                    justifyContent: "center",
-                    padding: "60px 24px"
-                }}
-            >
-                <div
-                    style={{
-                        maxWidth: 900,
-                        width: "100%",
-                        display: "grid",
-                        gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-                        gap: 24,
-                        textAlign: "center"
-                    }}
-                >
-                    {features.map((f) => (
-                        <div key={f.title}>
-                            <div
+            {/* How it works */}
+            <section style={{ width: "100%", padding: "60px 24px", background: colors.altBg }}>
+                <div style={{ maxWidth: 900, margin: "0 auto" }}>
+                    <h2 style={sectionTitle}>{t.howTitle}</h2>
+                    <div
+                        style={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                            gap: 28
+                        }}
+                    >
+                        {t.steps.map((s, i) => (
+                            <div key={i} style={{ textAlign: "center" }}>
+                                <div
+                                    style={{
+                                        width: 44,
+                                        height: 44,
+                                        margin: "0 auto 14px",
+                                        borderRadius: "50%",
+                                        background: ACCENT,
+                                        color: "#fff",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontWeight: 800,
+                                        boxShadow: `0 0 0 6px ${colors.soft}`
+                                    }}
+                                >
+                                    {isAr ? (i + 1).toLocaleString("ar-SA") : i + 1}
+                                </div>
+                                <h3 style={{ margin: "0 0 6px", fontSize: "1rem" }}>{s.title}</h3>
+                                <p style={{ margin: 0, fontSize: "0.88rem", lineHeight: 1.6, color: colors.body }}>
+                                    {s.text}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* What you get */}
+            <section style={{ width: "100%", padding: "60px 24px" }}>
+                <div style={{ maxWidth: 900, margin: "0 auto" }}>
+                    <h2 style={sectionTitle}>{t.featuresTitle}</h2>
+                    <div
+                        style={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+                            gap: 24,
+                            textAlign: "center"
+                        }}
+                    >
+                        {features.map((f) => (
+                            <div key={f.title}>
+                                <div
+                                    style={{
+                                        width: 48,
+                                        height: 48,
+                                        margin: "0 auto 12px",
+                                        borderRadius: 12,
+                                        background: colors.iconBox,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center"
+                                    }}
+                                >
+                                    <f.Icon color={ACCENT} />
+                                </div>
+                                <h3 style={{ margin: "0 0 6px", fontSize: "0.95rem" }}>{f.title}</h3>
+                                <p style={{ margin: 0, fontSize: "0.8rem", color: colors.body }}>{f.text}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Risk Score legend */}
+            <section style={{ width: "100%", padding: "60px 24px", background: colors.altBg }}>
+                <div style={{ maxWidth: 700, margin: "0 auto", textAlign: "center" }}>
+                    <h2 style={{ ...sectionTitle, margin: "0 0 12px" }}>{t.legendTitle}</h2>
+                    <p style={{ margin: "0 0 28px", fontSize: "0.95rem", lineHeight: 1.7, color: colors.body }}>
+                        {t.legendText}
+                    </p>
+                    <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 12 }}>
+                        {t.legend.map((label, i) => (
+                            <span
+                                key={label}
                                 style={{
-                                    width: 48,
-                                    height: 48,
-                                    margin: "0 auto 12px",
-                                    borderRadius: 12,
-                                    background: isDark ? "#1e293b" : "#eef2f8",
-                                    display: "flex",
+                                    display: "inline-flex",
                                     alignItems: "center",
-                                    justifyContent: "center"
+                                    gap: 8,
+                                    padding: "8px 18px",
+                                    borderRadius: 999,
+                                    background: LEGEND_COLORS[i].bg,
+                                    color: LEGEND_COLORS[i].text,
+                                    border: `1.5px solid ${LEGEND_COLORS[i].ring}`,
+                                    fontWeight: 600,
+                                    fontSize: "0.9rem"
                                 }}
                             >
-                                <f.Icon color={iconColor} />
-                            </div>
-                            <h3 style={{ margin: "0 0 6px", fontSize: "0.95rem" }}>{f.title}</h3>
-                            <p style={{ margin: 0, fontSize: "0.8rem", color: isDark ? "#94a3b8" : "#64748b" }}>{f.text}</p>
-                        </div>
-                    ))}
+                                <span
+                                    style={{
+                                        width: 10,
+                                        height: 10,
+                                        borderRadius: "50%",
+                                        background: LEGEND_COLORS[i].ring
+                                    }}
+                                />
+                                {label}
+                            </span>
+                        ))}
+                    </div>
                 </div>
-            </div>
+            </section>
+
+            {/* Final CTA */}
+            <section style={{ width: "100%", padding: "70px 24px", textAlign: "center", flex: 1 }}>
+                <h2
+                    style={{
+                        margin: "0 auto 24px",
+                        maxWidth: 560,
+                        fontSize: "1.5rem",
+                        fontWeight: 800,
+                        lineHeight: 1.4
+                    }}
+                >
+                    {t.ctaTitle}
+                </h2>
+                <button
+                    type="button"
+                    onClick={focusInput}
+                    style={{
+                        border: "none",
+                        borderRadius: 10,
+                        padding: "13px 32px",
+                        background: "linear-gradient(135deg, #6366f1 0%, #5b7ba8 100%)",
+                        color: "#fff",
+                        fontWeight: 700,
+                        fontSize: "0.95rem",
+                        cursor: "pointer"
+                    }}
+                >
+                    {t.ctaButton}
+                </button>
+            </section>
 
             <style>{`
                 @media (max-width: 760px) {

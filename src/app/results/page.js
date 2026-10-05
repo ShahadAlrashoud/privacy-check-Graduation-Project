@@ -382,7 +382,24 @@ function ResultsContent() {
                 </div>
             </div>
 
-            <div style={{ textAlign: "center", marginTop: 24 }}>
+            <div style={{ textAlign: "center", marginTop: 24, display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+                {result && (
+                    <Link
+                        href="/"
+                        style={{
+                            display: "inline-block",
+                            background: "#274870",
+                            color: "#fff",
+                            padding: "10px 22px",
+                            borderRadius: 8,
+                            fontSize: "0.9rem",
+                            fontWeight: 600,
+                            textDecoration: "none"
+                        }}
+                    >
+                        {isArabic ? "تحليل رابط آخر" : "Analyze another URL"}
+                    </Link>
+                )}
                 <Link href="/" style={{ color: "#274870", textDecoration: "none", fontWeight: 500 }}>
                     {isArabic ? "→ العودة إلى الصفحة الرئيسية" : "← Back to Homepage"}
                 </Link>

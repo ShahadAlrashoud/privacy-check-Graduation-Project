@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAnalysisById } from "../../../../../database/mockDb";
+import { getAnalysisById } from "../../../../../database/db";
 
 export async function GET(_request, { params }) {
     const { id } = await params;

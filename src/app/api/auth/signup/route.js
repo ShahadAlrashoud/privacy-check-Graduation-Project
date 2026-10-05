@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { createUser, getUserByEmail } from "../../../../../database/mockDb";
-
+import { createUser, getUserByEmail } from "../../../../../database/db";
 export async function POST(request) {
     try {
         const { username, email, password } = await request.json();
