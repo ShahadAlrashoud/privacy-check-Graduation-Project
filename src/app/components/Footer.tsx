@@ -7,29 +7,72 @@ import BYANLogo from "./BYANLogo";
 const content = {
     en: {
         tagline: "Before You Agree",
+        subtitle: "Understand what you're agreeing to.",
         description: "Plain-language analysis of Terms of Service and Privacy Policies, grounded in Saudi Arabia's PDPL.",
-        explore: "Explore",
+        product: "Product",
+        company: "Company",
         legal: "Legal",
-        home: "Home",
+        analyze: "Analyze",
+        compare: "Compare",
+        howItWorks: "How It Works",
         about: "About",
+        contact: "Contact",
+        faq: "FAQ",
         privacy: "Privacy Policy",
         terms: "Terms of Use",
+        disclaimerLink: "Disclaimer",
         disclaimer: "BYAN provides automated, informational analysis and does not constitute legal advice. Always review the original documents for important decisions.",
         rights: "All rights reserved."
     },
     ar: {
         tagline: "قبل أن توافق",
+        subtitle: "افهم ما توافق عليه.",
         description: "تحليل مبسّط لشروط الخدمة وسياسات الخصوصية، مستند إلى نظام حماية البيانات الشخصية السعودي (PDPL).",
-        explore: "استكشف",
+        product: "المنتج",
+        company: "الشركة",
         legal: "قانوني",
-        home: "الرئيسية",
+        analyze: "تحليل",
+        compare: "مقارنة",
+        howItWorks: "كيف يعمل",
         about: "من نحن",
+        contact: "تواصل معنا",
+        faq: "الأسئلة الشائعة",
         privacy: "سياسة الخصوصية",
         terms: "شروط الاستخدام",
+        disclaimerLink: "إخلاء المسؤولية",
         disclaimer: "يقدّم بيان تحليلًا آليًا لأغراض معلوماتية فقط، ولا يُعد استشارة قانونية. يُرجى مراجعة المستندات الأصلية عند اتخاذ القرارات المهمة.",
         rights: "جميع الحقوق محفوظة."
     }
 };
+
+type FooterKey = keyof typeof content.en;
+
+const sections: { title: FooterKey; links: { key: FooterKey; href: string }[] }[] = [
+    {
+        title: "product",
+        links: [
+            { key: "analyze", href: "/" },
+            { key: "compare", href: "/compare" },
+            { key: "howItWorks", href: "/how-it-works" }
+        ]
+    },
+    {
+        title: "company",
+        links: [
+            { key: "about", href: "/about" },
+            { key: "contact", href: "/contact" },
+            { key: "faq", href: "/faq" }
+        ]
+    },
+    {
+        title: "legal",
+        links: [
+            { key: "privacy", href: "/privacy" },
+            { key: "terms", href: "/terms" },
+            { key: "disclaimerLink", href: "/disclaimer" }
+        ]
+    }
+];
 
 export default function Footer() {
     const { theme, lang } = useTheme();
@@ -89,28 +132,31 @@ export default function Footer() {
                 {/* Brand */}
                 <div style={{ flex: "1 1 280px", maxWidth: 380 }}>
                     <BYANLogo />
-                    <p style={{ margin: "14px 0 6px", color: heading, fontWeight: 600, fontSize: "0.95rem" }}>
+                    <p style={{ margin: "14px 0 4px", color: heading, fontWeight: 600, fontSize: "0.95rem" }}>
                         {t.tagline}
+                    </p>
+                    <p style={{ margin: "0 0 10px", color: heading, fontSize: "0.88rem", opacity: 0.85 }}>
+                        {t.subtitle}
                     </p>
                     <p style={{ margin: 0, fontSize: "0.85rem", lineHeight: 1.7 }}>{t.description}</p>
                 </div>
 
                 {/* Links */}
                 <div style={{ display: "flex", gap: 56, flexWrap: "wrap" }}>
-                    <nav aria-label={t.explore}>
-                        <h2 style={colTitle}>{t.explore}</h2>
-                        <ul style={colList}>
-                            <li><Link href="/" style={linkStyle}>{t.home}</Link></li>
-                            <li><Link href="/about" style={linkStyle}>{t.about}</Link></li>
-                        </ul>
-                    </nav>
-                    <nav aria-label={t.legal}>
-                        <h2 style={colTitle}>{t.legal}</h2>
-                        <ul style={colList}>
-                            <li><Link href="/privacy" style={linkStyle}>{t.privacy}</Link></li>
-                            <li><Link href="/terms" style={linkStyle}>{t.terms}</Link></li>
-                        </ul>
-                    </nav>
+                    {sections.map((section) => (
+                        <nav key={section.title} aria-label={t[section.title]}>
+                            <h2 style={colTitle}>{t[section.title]}</h2>
+                            <ul style={colList}>
+                                {section.links.map((link) => (
+                                    <li key={link.key}>
+                                        <Link href={link.href} style={linkStyle}>
+                                            {t[link.key]}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </nav>
+                    ))}
                 </div>
             </div>
 
