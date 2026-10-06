@@ -1,4 +1,5 @@
 "use client";
+
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "./providers";
@@ -114,7 +115,6 @@ const content = {
 
         ctaTitle: "قبل أن توافق، اعرف على ماذا توافق.",
         ctaButton: "جرّب الآن",
-        {result.websiteName || result.url}
     },
 };
 

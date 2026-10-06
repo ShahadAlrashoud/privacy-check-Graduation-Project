@@ -113,8 +113,7 @@ return ( <main className="min-h-screen bg-gray-50 px-6 py-10"> <div className="m
         </p>
 
         <p className="text-lg font-semibold text-gray-900 break-all">
-          {result.websiteNamealyze", {
-      url}
+            {result.websiteName || result.url}
         </p>
       </div>
     </section>
