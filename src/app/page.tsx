@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "./providers";
@@ -82,10 +83,21 @@ const content = {
         legendText: "Every policy is summarized in a single risk score from 0 to 100, classified into one of three levels.",
         legend: ["Safe", "Medium Risk", "High Risk"],
 
+        disclaimerTitle: "Disclaimer",
+        disclaimerText:
+            "BYAN provides automated, informational analysis only. It is not legal advice, and results may be incomplete or inaccurate. Please read the original policies before agreeing.",
+        disclaimerLink: "Read full disclaimer",
+
         ctaTitle: "Before you agree, know what you're agreeing to.",
         ctaButton: "Try it now",
     },
+
     ar: {
+        disclaimerTitle: "تنبيه",
+        disclaimerText:
+            "يقدّم بيان تحليلاً آلياً للأغراض المعلوماتية فقط، وهو ليس استشارة قانونية، وقد تكون النتائج ناقصة أو غير دقيقة. يرجى قراءة السياسات الأصلية قبل الموافقة.",
+        disclaimerLink: "اقرأ إخلاء المسؤولية كاملاً",
+
         heroTitlePrefix: "قبل أن ",
         heroTitleAccent: "توافق",
         heroSubtitle: "اعرف حقوقك. افهم شروطك الآن.",
@@ -110,7 +122,8 @@ const content = {
         ],
 
         legendTitle: "اعرف مستوى الخطر بنظرة واحدة",
-        legendText: "يتم تلخيص كل سياسة في درجة مخاطر واحدة من 0 إلى 100، وتُصنَّف ضمن واحد من ثلاثة مستويات.",
+        legendText:
+            "يتم تلخيص كل سياسة في درجة مخاطر واحدة من 0 إلى 100، وتُصنَّف ضمن واحد من ثلاثة مستويات.",
         legend: ["آمن", "خطر متوسط", "خطر مرتفع"],
 
         ctaTitle: "قبل أن توافق، اعرف على ماذا توافق.",
@@ -120,7 +133,6 @@ const content = {
 
 const ACCENT = "#6366f1";
 
-// Same colors as the results page
 const LEGEND_COLORS = [
     { ring: "#86d9a4", bg: "#eafcf1", text: "#4a8f68" },
     { ring: "#f2c96b", bg: "#fdf6e3", text: "#a17f2d" },
@@ -133,40 +145,67 @@ export default function HomePage() {
     const [url, setUrl] = useState("");
     const [error, setError] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
+
     const router = useRouter();
     const { theme, lang } = useTheme();
+
     const isDark = theme === "dark";
     const isAr = lang === "ar";
     const t = content[lang];
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+
         if (!url.trim()) {
             setError(t.errorMsg);
             return;
         }
+
         setError("");
-        router.push(`/analyze?url=${encodeURIComponent(url.trim())}&lang=${lang}`);
+
+        router.push(
+            `/analyze?url=${encodeURIComponent(url.trim())}&lang=${lang}`
+        );
     }
 
     function focusInput() {
         window.scrollTo({ top: 0, behavior: "smooth" });
-        setTimeout(() => inputRef.current?.focus(), 400);
+
+        setTimeout(() => {
+            inputRef.current?.focus();
+        }, 400);
     }
 
-    const icons = [IconDocument, IconShield, IconWarning, IconSparkle];
-    const features = t.features.map((f, i) => ({ ...f, Icon: icons[i] }));
+    const icons = [
+        IconDocument,
+        IconShield,
+        IconWarning,
+        IconSparkle,
+    ];
+
+    const features = t.features.map((f, i) => ({
+        ...f,
+        Icon: icons[i],
+    }));
 
     const colors = {
         pageBg: isDark
             ? "linear-gradient(180deg, #0a0e1a 0%, #111827 100%)"
             : "#ffffff",
+
         altBg: isDark ? "#0f172a" : "#f8fafc",
+
         heading: isDark ? "#f1f1f1" : "#1e293b",
+
         body: isDark ? "#94a3b8" : "#64748b",
+
         line: isDark ? "#1e293b" : "#e2e8f0",
+
         iconBox: isDark ? "#1e293b" : "#eef2f8",
-        soft: isDark ? "rgba(99, 102, 241, 0.15)" : "#eef0ff",
+
+        soft: isDark
+            ? "rgba(99, 102, 241, 0.15)"
+            : "#eef0ff",
     };
 
     const sectionTitle = {
@@ -190,7 +229,9 @@ export default function HomePage() {
             }}
         >
             {/* Hero */}
+
             <div
+                className="byan-hero"
                 style={{
                     maxWidth: 700,
                     margin: "0 auto",
@@ -198,13 +239,30 @@ export default function HomePage() {
                     padding: "90px 24px 50px",
                     textAlign: isAr ? "right" : "left",
                 }}
-                className="byan-hero"
             >
-                <h1 style={{ fontSize: "2.6rem", fontWeight: 800, margin: "0 0 20px", lineHeight: 1.2 }}>
+                <h1
+                    style={{
+                        fontSize: "2.6rem",
+                        fontWeight: 800,
+                        margin: "0 0 20px",
+                        lineHeight: 1.2,
+                    }}
+                >
                     {t.heroTitlePrefix}
-                    <span style={{ color: ACCENT }}>{t.heroTitleAccent}</span>
+
+                    <span style={{ color: ACCENT }}>
+                        {t.heroTitleAccent}
+                    </span>
                 </h1>
-                <p style={{ fontSize: "1.05rem", color: colors.body, margin: "0 0 24px", lineHeight: 1.6 }}>
+
+                <p
+                    style={{
+                        fontSize: "1.05rem",
+                        color: colors.body,
+                        margin: "0 0 24px",
+                        lineHeight: 1.6,
+                    }}
+                >
                     {t.heroSubtitle}
                 </p>
 
@@ -215,7 +273,9 @@ export default function HomePage() {
                         display: "flex",
                         gap: 10,
                         background: isDark ? "#111827" : "#f4f7fb",
-                        border: isDark ? "1px solid #334155" : "1px solid #e2e8f0",
+                        border: isDark
+                            ? "1px solid #334155"
+                            : "1px solid #e2e8f0",
                         borderRadius: 14,
                         padding: 8,
                         maxWidth: 480,
@@ -239,13 +299,15 @@ export default function HomePage() {
                             textAlign: isAr ? "right" : "left",
                         }}
                     />
+
                     <button
                         type="submit"
                         style={{
                             border: "none",
                             borderRadius: 10,
                             padding: "13px 26px",
-                            background: "linear-gradient(135deg, #6366f1 0%, #5b7ba8 100%)",
+                            background:
+                                "linear-gradient(135deg, #6366f1 0%, #5b7ba8 100%)",
                             color: "#fff",
                             fontWeight: 700,
                             fontSize: "0.95rem",
@@ -256,30 +318,74 @@ export default function HomePage() {
                         {t.button}
                     </button>
                 </form>
+
                 {error && (
-                    <p style={{ color: "#dc2626", fontSize: "0.85rem", marginTop: 10 }}>{error}</p>
+                    <p
+                        style={{
+                            color: "#dc2626",
+                            fontSize: "0.85rem",
+                            marginTop: 10,
+                        }}
+                    >
+                        {error}
+                    </p>
                 )}
-                <p style={{ marginTop: 14, fontSize: "0.8rem", color: isDark ? "#64748b" : "#94a3b8" }}>
+
+                <p
+                    style={{
+                        marginTop: 14,
+                        fontSize: "0.8rem",
+                        color: isDark ? "#64748b" : "#94a3b8",
+                    }}
+                >
                     {t.helperText}
                 </p>
             </div>
 
             {/* Divider */}
-            <div style={{ width: "100%", height: 1, background: colors.line }} />
+
+            <div
+                style={{
+                    width: "100%",
+                    height: 1,
+                    background: colors.line,
+                }}
+            />
 
             {/* How it works */}
-            <section style={{ width: "100%", padding: "60px 24px", background: colors.altBg }}>
-                <div style={{ maxWidth: 900, margin: "0 auto" }}>
-                    <h2 style={sectionTitle}>{t.howTitle}</h2>
+
+            <section
+                style={{
+                    width: "100%",
+                    padding: "60px 24px",
+                    background: colors.altBg,
+                }}
+            >
+                <div
+                    style={{
+                        maxWidth: 900,
+                        margin: "0 auto",
+                    }}
+                >
+                    <h2 style={sectionTitle}>
+                        {t.howTitle}
+                    </h2>
+
                     <div
                         style={{
                             display: "grid",
-                            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                            gridTemplateColumns:
+                                "repeat(auto-fit, minmax(220px, 1fr))",
                             gap: 28,
                         }}
                     >
                         {t.steps.map((s, i) => (
-                            <div key={i} style={{ textAlign: "center" }}>
+                            <div
+                                key={i}
+                                style={{
+                                    textAlign: "center",
+                                }}
+                            >
                                 <div
                                     style={{
                                         width: 44,
@@ -292,13 +398,32 @@ export default function HomePage() {
                                         alignItems: "center",
                                         justifyContent: "center",
                                         fontWeight: 800,
-                                        boxShadow: `0 0 0 6px ${colors.soft}`,
+                                        boxShadow:
+                                            `0 0 0 6px ${colors.soft}`,
                                     }}
                                 >
-                                    {isAr ? (i + 1).toLocaleString("ar-SA") : i + 1}
+                                    {isAr
+                                        ? (i + 1).toLocaleString("ar-SA")
+                                        : i + 1}
                                 </div>
-                                <h3 style={{ margin: "0 0 6px", fontSize: "1rem" }}>{s.title}</h3>
-                                <p style={{ margin: 0, fontSize: "0.88rem", lineHeight: 1.6, color: colors.body }}>
+
+                                <h3
+                                    style={{
+                                        margin: "0 0 6px",
+                                        fontSize: "1rem",
+                                    }}
+                                >
+                                    {s.title}
+                                </h3>
+
+                                <p
+                                    style={{
+                                        margin: 0,
+                                        fontSize: "0.88rem",
+                                        lineHeight: 1.6,
+                                        color: colors.body,
+                                    }}
+                                >
                                     {s.text}
                                 </p>
                             </div>
@@ -308,13 +433,28 @@ export default function HomePage() {
             </section>
 
             {/* What you get */}
-            <section style={{ width: "100%", padding: "60px 24px" }}>
-                <div style={{ maxWidth: 900, margin: "0 auto" }}>
-                    <h2 style={sectionTitle}>{t.featuresTitle}</h2>
+
+            <section
+                style={{
+                    width: "100%",
+                    padding: "60px 24px",
+                }}
+            >
+                <div
+                    style={{
+                        maxWidth: 900,
+                        margin: "0 auto",
+                    }}
+                >
+                    <h2 style={sectionTitle}>
+                        {t.featuresTitle}
+                    </h2>
+
                     <div
                         style={{
                             display: "grid",
-                            gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+                            gridTemplateColumns:
+                                "repeat(auto-fit, minmax(160px, 1fr))",
                             gap: 24,
                             textAlign: "center",
                         }}
@@ -335,8 +475,25 @@ export default function HomePage() {
                                 >
                                     <f.Icon color={ACCENT} />
                                 </div>
-                                <h3 style={{ margin: "0 0 6px", fontSize: "0.95rem" }}>{f.title}</h3>
-                                <p style={{ margin: 0, fontSize: "0.8rem", color: colors.body }}>{f.text}</p>
+
+                                <h3
+                                    style={{
+                                        margin: "0 0 6px",
+                                        fontSize: "0.95rem",
+                                    }}
+                                >
+                                    {f.title}
+                                </h3>
+
+                                <p
+                                    style={{
+                                        margin: 0,
+                                        fontSize: "0.8rem",
+                                        color: colors.body,
+                                    }}
+                                >
+                                    {f.text}
+                                </p>
                             </div>
                         ))}
                     </div>
@@ -344,13 +501,49 @@ export default function HomePage() {
             </section>
 
             {/* Risk score legend */}
-            <section style={{ width: "100%", padding: "60px 24px", background: colors.altBg }}>
-                <div style={{ maxWidth: 700, margin: "0 auto", textAlign: "center" }}>
-                    <h2 style={{ ...sectionTitle, margin: "0 0 12px" }}>{t.legendTitle}</h2>
-                    <p style={{ margin: "0 0 28px", fontSize: "0.95rem", lineHeight: 1.7, color: colors.body }}>
+
+            <section
+                style={{
+                    width: "100%",
+                    padding: "60px 24px",
+                    background: colors.altBg,
+                }}
+            >
+                <div
+                    style={{
+                        maxWidth: 700,
+                        margin: "0 auto",
+                        textAlign: "center",
+                    }}
+                >
+                    <h2
+                        style={{
+                            ...sectionTitle,
+                            margin: "0 0 12px",
+                        }}
+                    >
+                        {t.legendTitle}
+                    </h2>
+
+                    <p
+                        style={{
+                            margin: "0 0 28px",
+                            fontSize: "0.95rem",
+                            lineHeight: 1.7,
+                            color: colors.body,
+                        }}
+                    >
                         {t.legendText}
                     </p>
-                    <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 12 }}>
+
+                    <div
+                        style={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            justifyContent: "center",
+                            gap: 12,
+                        }}
+                    >
                         {t.legend.map((label, i) => (
                             <span
                                 key={label}
@@ -360,9 +553,12 @@ export default function HomePage() {
                                     gap: 8,
                                     padding: "8px 18px",
                                     borderRadius: 999,
-                                    background: LEGEND_COLORS[i].bg,
-                                    color: LEGEND_COLORS[i].text,
-                                    border: `1.5px solid ${LEGEND_COLORS[i].ring}`,
+                                    background:
+                                        LEGEND_COLORS[i].bg,
+                                    color:
+                                        LEGEND_COLORS[i].text,
+                                    border:
+                                        `1.5px solid ${LEGEND_COLORS[i].ring}`,
                                     fontWeight: 600,
                                     fontSize: "0.9rem",
                                 }}
@@ -372,9 +568,11 @@ export default function HomePage() {
                                         width: 10,
                                         height: 10,
                                         borderRadius: "50%",
-                                        background: LEGEND_COLORS[i].ring,
+                                        background:
+                                            LEGEND_COLORS[i].ring,
                                     }}
                                 />
+
                                 {label}
                             </span>
                         ))}
@@ -382,8 +580,83 @@ export default function HomePage() {
                 </div>
             </section>
 
+            {/* Disclaimer */}
+
+            <section
+                style={{
+                    width: "100%",
+                    padding: "28px 24px",
+                    background: isDark ? "#111827" : "#f8fafc",
+                    borderTop: `1px solid ${colors.line}`,
+                    borderBottom: `1px solid ${colors.line}`,
+                }}
+            >
+                <div
+                    style={{
+                        maxWidth: 850,
+                        margin: "0 auto",
+                        textAlign: "center",
+                    }}
+                >
+                    <div
+                        style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 8,
+                            marginBottom: 8,
+                        }}
+                    >
+                        <IconWarning color="#d89b32" />
+
+                        <h3
+                            style={{
+                                margin: 0,
+                                fontSize: "0.95rem",
+                                fontWeight: 800,
+                                color: colors.heading,
+                            }}
+                        >
+                            {t.disclaimerTitle}
+                        </h3>
+                    </div>
+
+                    <p
+                        style={{
+                            maxWidth: 760,
+                            margin: "0 auto 8px",
+                            fontSize: "0.78rem",
+                            lineHeight: 1.7,
+                            color: colors.body,
+                        }}
+                    >
+                        {t.disclaimerText}
+                    </p>
+
+                    <Link
+                        href="/disclaimer"
+                        style={{
+                            fontSize: "0.78rem",
+                            color: ACCENT,
+                            fontWeight: 700,
+                            textDecoration: "none",
+                        }}
+                    >
+                        {t.disclaimerLink}
+                    </Link>
+                </div>
+            </section>
+
             {/* Final CTA */}
-            <section style={{ width: "100%", padding: "70px 24px", textAlign: "center", flex: 1 }}>
+
+            <section
+                style={{
+                    width: "100%",
+                    padding: "70px 24px",
+                    textAlign: "center",
+                    flex: 1,
+                }}
+            >
                 <h2
                     style={{
                         margin: "0 auto 24px",
@@ -395,6 +668,7 @@ export default function HomePage() {
                 >
                     {t.ctaTitle}
                 </h2>
+
                 <button
                     type="button"
                     onClick={focusInput}
@@ -402,7 +676,8 @@ export default function HomePage() {
                         border: "none",
                         borderRadius: 10,
                         padding: "13px 32px",
-                        background: "linear-gradient(135deg, #6366f1 0%, #5b7ba8 100%)",
+                        background:
+                            "linear-gradient(135deg, #6366f1 0%, #5b7ba8 100%)",
                         color: "#fff",
                         fontWeight: 700,
                         fontSize: "0.95rem",
@@ -413,11 +688,14 @@ export default function HomePage() {
                 </button>
             </section>
 
+            {/* Responsive */}
+
             <style>{`
                 @media (max-width: 760px) {
                     .byan-hero {
                         text-align: center;
                     }
+
                     .byan-hero form {
                         margin: 0 auto;
                     }
