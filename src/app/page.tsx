@@ -318,6 +318,64 @@ export default function HomePage() {
                         {t.button}
                     </button>
                 </form>
+                ```tsx
+{/* Upload policy image */}
+
+<div
+    style={{
+        marginTop: 18,
+        maxWidth: 480,
+        textAlign: "center",
+    }}
+>
+    <p
+        style={{
+            margin: "0 0 10px",
+            fontSize: "0.82rem",
+            color: colors.body,
+        }}
+    >
+        {isAr
+            ? "أو ارفع صورة للسياسة"
+            : "Or upload a screenshot of the policy"}
+    </p>
+
+    <label
+        htmlFor="policy-image"
+        style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+            padding: "10px 18px",
+            borderRadius: 10,
+            border: `1px solid ${isDark ? "#334155" : "#dbe2ea"}`,
+            background: isDark ? "#111827" : "#ffffff",
+            color: ACCENT,
+            fontWeight: 700,
+            fontSize: "0.85rem",
+            cursor: "pointer",
+        }}
+    >
+        📷 {isAr ? "اختيار صورة" : "Choose Image"}
+    </label>
+
+    <input
+        id="policy-image"
+        type="file"
+        accept="image/*"
+        style={{ display: "none" }}
+        onChange={(e) => {
+            const file = e.target.files?.[0];
+
+            if (file) {
+                console.log("Policy image selected:", file);
+            }
+        }}
+    />
+</div>
+```
+
 
                 {error && (
                     <p
